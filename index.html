@@ -35,11 +35,9 @@
 
     a { text-decoration: none; color: inherit; cursor: pointer; }
 
-    /* ── PAGE VIEWS ── */
     .page { display: none; }
     .page.active { display: block; }
 
-    /* ── HEADER ── */
     header {
       position: sticky;
       top: 0;
@@ -127,7 +125,6 @@
       margin-left: 4px;
     }
 
-    /* ── HERO ── */
     .hero {
       position: relative;
       width: 100%;
@@ -278,7 +275,6 @@
     .hero-arrow.prev { left: 16px; }
     .hero-arrow.next { right: 16px; }
 
-    /* ── HOMEPAGE PRODUCT SECTION ── */
     .section-header {
       text-align: center;
       padding: 56px 24px 32px;
@@ -301,7 +297,6 @@
 
     .products-section { padding: 0 16px 64px; }
 
-    /* ── PRODUCT GRID (shared) ── */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -372,7 +367,6 @@
       text-decoration: line-through;
     }
 
-    /* ── COLLECTIONS PAGE ── */
     .collection-header {
       padding: 48px 24px 0;
       max-width: 1400px;
@@ -465,7 +459,6 @@
       outline: none;
     }
 
-    /* Collection grid – 3 col on desktop */
     .collection-grid-wrap {
       padding: 0 14px 0;
       max-width: 1400px;
@@ -478,7 +471,6 @@
       gap: 2px;
     }
 
-    /* Brand statement (from the /hoodies page) */
     .brand-statement {
       padding: 56px 24px;
       max-width: 900px;
@@ -495,7 +487,6 @@
       color: var(--black);
     }
 
-    /* ── COMMUNITY SECTION (shared) ── */
     .community-section { padding: 40px 0 64px; }
 
     .community-header {
@@ -544,7 +535,6 @@
     }
     .community-img:hover { opacity: 0.85; }
 
-    /* ── REVIEWS TICKER (PDP) ── */
     .reviews-ticker {
       overflow: hidden;
       position: relative;
@@ -561,7 +551,6 @@
       animation-play-state: paused;
     }
 
-    /* ── FOOTER ── */
     footer {
       background: var(--white);
       border-top: 1px solid var(--gray-mid);
@@ -619,7 +608,6 @@
     }
     .footer-social a:hover { color: var(--black); }
 
-    /* ── CART DRAWER ── */
     .cart-overlay {
       position: fixed;
       inset: 0;
@@ -761,7 +749,6 @@
       margin-bottom: 14px;
     }
 
-    /* ── PAGE TRANSITION ── */
     .page-enter {
       animation: pageIn 0.35s ease forwards;
     }
@@ -770,9 +757,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ══════════════════════════════════
-       PRODUCT DETAIL PAGE (PDP)
-    ══════════════════════════════════ */
     .pdp-breadcrumb {
       max-width: 1300px;
       margin: 0 auto;
@@ -793,7 +777,6 @@
       gap: 56px;
     }
 
-    /* Gallery */
     .pdp-gallery { display: flex; gap: 12px; }
 
     .pdp-thumbs {
@@ -855,7 +838,6 @@
       padding: 4px 9px;
     }
 
-    /* Info column */
     .pdp-info { padding-bottom: 48px; }
 
     .pdp-title {
@@ -993,7 +975,6 @@
     .pdp-accordion-content p { margin-bottom: 10px; }
     .pdp-accordion-content a { text-decoration: underline; }
 
-    /* Lifestyle banner */
     .pdp-lifestyle {
       width: 100%;
       max-height: 640px;
@@ -1029,7 +1010,6 @@
       color: #333;
     }
 
-    /* Reviews header */
     .pdp-reviews-header {
       text-align: center;
       font-size: 13px;
@@ -1039,7 +1019,6 @@
       margin-bottom: 28px;
     }
 
-    /* Review card (used inside scroller) */
     .pdp-review-card {
       flex: 0 0 240px;
       background: var(--gray-light);
@@ -1066,10 +1045,8 @@
       color: var(--gray-text);
     }
 
-    /* You may also like */
     .pdp-related-wrap { padding: 56px 16px 0; }
 
-    /* Toast */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -1088,7 +1065,6 @@
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
       .collection-product-grid { grid-template-columns: repeat(2, 1fr); }
       .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; }
@@ -1114,10 +1090,6 @@
   </style>
 </head>
 <body>
-
-<!-- ══════════════════════════════════
-     SHARED: Header
-══════════════════════════════════ -->
 
 <header>
   <div class="header-inner">
@@ -1150,15 +1122,10 @@
   </div>
 </header>
 
-<!-- ══════════════════════════════════
-     PAGE: HOME
-══════════════════════════════════ -->
 <div id="page-home" class="page active">
 
-  <!-- Hero Slider (infinite loop with clones) -->
   <section class="hero">
     <div class="hero-slides" id="heroSlides">
-      <!-- Clone of last slide (placed first) -->
       <div class="hero-slide">
         <img src="https://placehold.co/1600x900/2a2a2a/fff?text=Hero+2" alt="REV Hoodie Lifestyle" loading="lazy">
         <div class="hero-overlay"></div>
@@ -1169,8 +1136,6 @@
           <a class="btn-primary" onclick="navigate('collections')">Explore</a>
         </div>
       </div>
-
-      <!-- Real slide 1 -->
       <div class="hero-slide">
         <img src="https://placehold.co/1600x900/1a1a1a/fff?text=Hero+1" alt="REV Hoodie" loading="eager">
         <div class="hero-overlay"></div>
@@ -1181,8 +1146,6 @@
           <a class="btn-primary" onclick="navigate('collections')">Shop now</a>
         </div>
       </div>
-
-      <!-- Real slide 2 -->
       <div class="hero-slide">
         <img src="https://placehold.co/1600x900/2a2a2a/fff?text=Hero+2" alt="REV Hoodie Lifestyle" loading="lazy">
         <div class="hero-overlay"></div>
@@ -1193,8 +1156,6 @@
           <a class="btn-primary" onclick="navigate('collections')">Explore</a>
         </div>
       </div>
-
-      <!-- Clone of first slide (placed last) -->
       <div class="hero-slide">
         <img src="https://placehold.co/1600x900/1a1a1a/fff?text=Hero+1" alt="REV Hoodie" loading="lazy">
         <div class="hero-overlay"></div>
@@ -1216,7 +1177,6 @@
     </div>
   </section>
 
-  <!-- Home Product Grid -->
   <section>
     <div class="section-header">
       <p class="section-label">Latest Drops</p>
@@ -1227,7 +1187,6 @@
     </div>
   </section>
 
-  <!-- Community -->
   <section class="community-section">
     <div class="community-header">
       <p class="community-label">Be part of the community</p>
@@ -1238,7 +1197,6 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-grid">
       <div class="footer-col">
@@ -1269,15 +1227,10 @@
     </div>
   </footer>
 
-</div><!-- /page-home -->
+</div>
 
-
-<!-- ══════════════════════════════════
-     PAGE: COLLECTIONS / HOODIES
-══════════════════════════════════ -->
 <div id="page-collections" class="page">
 
-  <!-- Collection Header -->
   <div class="collection-header">
     <p class="collection-breadcrumb">
       <a onclick="navigate('home')">Home</a> / <span>Hoodies</span>
@@ -1288,7 +1241,6 @@
     </div>
   </div>
 
-  <!-- Toolbar -->
   <div class="collection-toolbar">
     <div class="filter-pills">
       <button class="filter-pill active" onclick="setFilter('all', this)">All</button>
@@ -1305,17 +1257,14 @@
     </div>
   </div>
 
-  <!-- Collection Grid -->
   <div class="collection-grid-wrap">
     <div class="collection-product-grid" id="collectionProductGrid"><div style="text-align:center;padding:60px 0;color:var(--gray-text);grid-column:1/-1;">Loading products...</div></div>
   </div>
 
-  <!-- Brand Statement -->
   <div class="brand-statement">
     <p>Your Brand stands for minimalist, timeless essentials that give comfort, calm and a feeling of confidence. More substance and less stress in everyday life while you write your own story. The perfect fit for everyday. Everywhere.</p>
   </div>
 
-  <!-- Community -->
   <section class="community-section">
     <div class="community-header">
       <p class="community-label">Be part of the community</p>
@@ -1326,7 +1275,6 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-grid">
       <div class="footer-col">
@@ -1357,12 +1305,8 @@
     </div>
   </footer>
 
-</div><!-- /page-collections -->
+</div>
 
-
-<!-- ══════════════════════════════════
-     PAGE: PRODUCT DETAIL (PDP)
-══════════════════════════════════ -->
 <div id="page-product" class="page">
 
   <p class="pdp-breadcrumb">
@@ -1370,7 +1314,6 @@
   </p>
 
   <div class="pdp-main">
-    <!-- Gallery -->
     <div class="pdp-gallery">
       <div class="pdp-thumbs" id="pdpThumbs"></div>
       <div class="pdp-main-image-wrap">
@@ -1381,7 +1324,6 @@
       </div>
     </div>
 
-    <!-- Info -->
     <div class="pdp-info">
       <h1 class="pdp-title" id="pdpTitle">REV HOODIE</h1>
       <p class="pdp-rating"><span class="stars">★★★★★</span>4.8 / 5 Rated</p>
@@ -1424,7 +1366,6 @@
     </div>
   </div>
 
-  <!-- Lifestyle banner -->
   <img class="pdp-lifestyle" id="pdpLifestyleImg" src="https://placehold.co/1500x640/999/fff?text=Lifestyle" alt="Lifestyle">
 
   <div class="pdp-feature-block">
@@ -1437,7 +1378,6 @@
     </p>
   </div>
 
-  <!-- Reviews (ticker) -->
   <section class="community-section" style="padding-top:0;">
     <h3 class="pdp-reviews-header">Loved by everyone, everywhere.</h3>
     <div class="reviews-ticker">
@@ -1445,7 +1385,6 @@
     </div>
   </section>
 
-  <!-- Community -->
   <section class="community-section">
     <div class="community-header">
       <p class="community-label">Be part of the community</p>
@@ -1456,7 +1395,6 @@
     </div>
   </section>
 
-  <!-- You may also like -->
   <section class="pdp-related-wrap">
     <div class="section-header" style="padding-top:0;">
       <p class="section-label">You may also like</p>
@@ -1465,7 +1403,6 @@
     <div class="product-grid" id="pdpRelatedGrid"><div style="text-align:center;padding:30px 0;color:var(--gray-text);grid-column:1/-1;">Loading...</div></div>
   </section>
 
-  <!-- Footer -->
   <footer>
     <div class="footer-grid">
       <div class="footer-col">
@@ -1496,10 +1433,8 @@
     </div>
   </footer>
 
-</div><!-- /page-product -->
+</div>
 
-
-<!-- ── CART DRAWER ── -->
 <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
   <div class="cart-header">
@@ -1540,36 +1475,66 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 /* ════════════════════════════════
-   TRACK REFERRAL CLICKS
+   TRACK REFERRAL CLICKS (DEBUG VERSION)
 ════════════════════════════════ */
 async function trackReferralClick() {
   const urlParams = new URLSearchParams(window.location.search);
   const refCode = urlParams.get('ref');
-  if (!refCode) return;
+  console.log('═══ TRACK REFERRAL ═══');
+  console.log('1. URL:', window.location.href);
+  console.log('2. refCode dari URL:', refCode);
+  
+  if (!refCode) {
+    console.log('3. Tidak ada refCode, keluar.');
+    return;
+  }
 
   // Cegah penghitungan ganda dalam sesi yang sama
-  if (sessionStorage.getItem('ref_clicked') === refCode) return;
+  if (sessionStorage.getItem('ref_clicked') === refCode) {
+    console.log('3. Sudah dihitung di sesi ini, keluar.');
+    return;
+  }
   sessionStorage.setItem('ref_clicked', refCode);
+  console.log('3. Menandai sesi dengan refCode:', refCode);
 
   try {
-    // Cari affiliate berdasarkan refCode (field terpisah)
+    console.log('4. Mencari affiliate dengan refCode:', refCode);
     const snapshot = await db.collection('affiliates')
       .where('refCode', '==', refCode)
       .get();
+    
+    console.log('5. Hasil query:');
+    console.log('   - empty?', snapshot.empty);
+    console.log('   - jumlah dokumen:', snapshot.docs.length);
 
-    if (snapshot.empty) return;
+    if (snapshot.empty) {
+      console.log('6. TIDAK DITEMUKAN affiliate dengan refCode:', refCode);
+      console.log('   Pastikan field "refCode" ada di dokumen Firestore.');
+      return;
+    }
 
     const doc = snapshot.docs[0];
-    const currentClicks = doc.data().clicks || 0;
+    const data = doc.data();
+    console.log('7. Dokumen ditemukan:');
+    console.log('   - ID:', doc.id);
+    console.log('   - userId:', data.userId);
+    console.log('   - refCode:', data.refCode);
+    console.log('   - clicks saat ini:', data.clicks);
 
-    // Tambah 1 klik
+    const currentClicks = data.clicks || 0;
+    console.log('8. Menambah klik dari', currentClicks, 'menjadi', currentClicks + 1);
+    
     await db.collection('affiliates').doc(doc.id).update({
       clicks: currentClicks + 1
     });
-
-    console.log('Referral click recorded for ref:', refCode);
+    
+    console.log('9. ✅ BERHASIL! Klik tercatat untuk ref:', refCode);
+    console.log('═══ SELESAI ═══');
   } catch (err) {
-    console.error('Gagal mencatat klik referral:', err);
+    console.log('❌ ERROR:');
+    console.log('   - message:', err.message);
+    console.log('   - code:', err.code);
+    console.log('═══ GAGAL ═══');
   }
 }
 
@@ -1588,7 +1553,6 @@ let cart = [];
 let cartOpen = false;
 let toastTimer = null;
 
-/* ── COMMUNITY IMAGES ── */
 const communityImgs = [
   "https://placehold.co/260x320/444/fff?text=Community+1",
   "https://placehold.co/260x320/555/fff?text=Community+2",
@@ -1599,7 +1563,6 @@ const communityImgs = [
   "https://placehold.co/260x320/aaa/fff?text=Community+7"
 ];
 
-/* ── REVIEWS ── */
 const reviews = [
   { img: "https://placehold.co/240x320/314/fff?text=Review+1", text: "Getting compliments everywhere", author: "David" },
   { img: "https://placehold.co/240x320/425/fff?text=Review+2", text: "Quality is nice. Next color is already ordered", author: "Jannik S." },
@@ -1625,9 +1588,6 @@ const detailsHTML = `
   <p>Do not bleach · Do not put in the dryer · Do not iron hot · 30°C special gentle wash</p>
 `;
 
-/* ════════════════════════════════
-   FIRESTORE — LOAD PRODUCTS
-════════════════════════════════ */
 async function loadProducts() {
   try {
     const snapshot = await db.collection('products').get();
@@ -1747,9 +1707,6 @@ function getDefaultProducts() {
   ];
 }
 
-/* ════════════════════════════════
-   RENDER HELPERS
-════════════════════════════════ */
 function makeCard(p) {
   const div = document.createElement('div');
   div.className = 'product-card';
@@ -1794,9 +1751,6 @@ function renderTicker(containerId) {
   });
 }
 
-/* ════════════════════════════════
-   NAVIGATION (SPA)
-════════════════════════════════ */
 function navigate(page) {
   if (currentPage === page) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
 
@@ -1833,9 +1787,6 @@ function goBack() {
   }
 }
 
-/* ════════════════════════════════
-   COLLECTION FILTER & SORT
-════════════════════════════════ */
 function setFilter(filter, btn) {
   currentFilter = filter;
   document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
@@ -1859,9 +1810,6 @@ function applyFilterSort() {
   document.querySelector('.collection-count').textContent = list.length + ' product' + (list.length !== 1 ? 's' : '');
 }
 
-/* ════════════════════════════════
-   HERO SLIDER
-════════════════════════════════ */
 const totalRealSlides = 2;
 let currentSlide = 1;
 let autoplayTimer;
@@ -1888,9 +1836,6 @@ function moveSlide(dir) {
 goSlide(1, true);
 autoplayTimer = setInterval(() => moveSlide(1), 5000);
 
-/* ════════════════════════════════
-   PRODUCT DETAIL PAGE
-════════════════════════════════ */
 function navigateToProduct(slug) {
   const product = allProducts.find(p => p.slug === slug);
   if (!product) {
@@ -1929,14 +1874,12 @@ function renderProductPage(product) {
   document.getElementById('pdpLifestyleImg').alt = product.name + ' lifestyle';
   document.getElementById('pdpLifestyleImg').src = product.img2 || product.gallery?.[0] || 'https://placehold.co/1500x640/999/fff?text=Lifestyle';
 
-  // Stock note
   const hasStock = Object.values(product.sizes || {}).some(v => v === true);
   document.getElementById('pdpStockNote').textContent = hasStock ? 'In stock' : 'Low stock';
   document.getElementById('pdpStockNote').style.color = hasStock ? 'var(--green)' : '#c0392b';
 
   updatePdpMainImage();
 
-  // Thumbs
   const thumbsEl = document.getElementById('pdpThumbs');
   thumbsEl.innerHTML = '';
   const gallery = product.gallery || [product.img || 'https://placehold.co/1200x1600/ccc/fff?text=No+Image'];
@@ -1948,7 +1891,6 @@ function renderProductPage(product) {
     thumbsEl.appendChild(div);
   });
 
-  // Sizes
   const sizeGrid = document.getElementById('pdpSizeGrid');
   sizeGrid.innerHTML = '';
   const sizes = product.sizes || { XS: false, S: false, M: false, L: false, XL: false };
@@ -1963,7 +1905,6 @@ function renderProductPage(product) {
 
   resetAddButton();
 
-  // Reviews ticker
   const track = document.getElementById('pdpReviewsTrack');
   track.innerHTML = '';
   const doubledReviews = [...reviews, ...reviews];
@@ -1979,7 +1920,6 @@ function renderProductPage(product) {
     track.appendChild(card);
   });
 
-  // Related products
   const related = allProducts.filter(p => p.slug !== product.slug).slice(0, 4);
   renderGrid('pdpRelatedGrid', related);
 
@@ -2018,9 +1958,6 @@ function toggleAccordion(id) {
   document.getElementById(id).classList.toggle('open');
 }
 
-/* ════════════════════════════════
-   CART (localStorage)
-════════════════════════════════ */
 function loadCart() {
   try {
     const data = localStorage.getItem('shop_cart');
@@ -2127,9 +2064,6 @@ function renderCart() {
   footer.style.display = 'block';
 }
 
-/* ════════════════════════════════
-   TOAST
-════════════════════════════════ */
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -2138,11 +2072,8 @@ function showToast(msg) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
-/* ════════════════════════════════
-   INIT
-════════════════════════════════ */
 async function init() {
-  // Catat klik referral jika ada parameter ?ref=
+  // Track referral click DULUAN
   await trackReferralClick();
 
   await loadProducts();
