@@ -1525,7 +1525,7 @@
 
 <script>
 /* ════════════════════════════════
-   FIREBASE CONFIG — GANTI DENGAN MILIK ANDA
+   FIREBASE CONFIG
 ════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyCzmLBBbpvWakuogg2XrxEg_ojJE0prxZU",
@@ -1552,10 +1552,9 @@ async function trackReferralClick() {
   sessionStorage.setItem('ref_clicked', refCode);
 
   try {
-    // Cari affiliate yang link referralnya mengandung refCode
+    // Cari affiliate berdasarkan refCode (field terpisah)
     const snapshot = await db.collection('affiliates')
-      .where('referralLink', '>=', `/?ref=${refCode}`)
-      .where('referralLink', '<=', `/?ref=${refCode}\uf8ff`)
+      .where('refCode', '==', refCode)
       .get();
 
     if (snapshot.empty) return;
