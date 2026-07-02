@@ -3,9 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Brand - Official Online Shop</title>
+  <title>Your Brand — Official Online Shop</title>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
       --white: #ffffff;
       --black: #111111;
@@ -14,7 +21,9 @@
       --gray-text: #888888;
       --font: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
+
     html { scroll-behavior: smooth; }
+
     body {
       font-family: var(--font);
       background: var(--white);
@@ -23,783 +32,2130 @@
       letter-spacing: 0.03em;
       overflow-x: hidden;
     }
+
     a { text-decoration: none; color: inherit; cursor: pointer; }
-    /* Header */
+
+    /* ── PAGE VIEWS ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── HEADER ── */
     header {
-      position: sticky; top: 0; z-index: 100; background: var(--white); border-bottom: 1px solid var(--gray-mid);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-mid);
     }
+
     .header-inner {
-      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 24px; height: 56px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: 0 24px;
+      height: 56px;
     }
+
     .nav-left { display: flex; gap: 28px; align-items: center; }
+
     .nav-left a {
-      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; transition: opacity 0.2s;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: opacity 0.2s;
     }
     .nav-left a:hover, .nav-left a.active-link { opacity: 0.4; }
+
     .back-btn {
-      background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      transition: opacity 0.2s;
     }
+    .back-btn:hover { opacity: 0.4; }
+
     .logo {
-      font-size: 17px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; text-align: center; cursor: pointer;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      text-align: center;
+      cursor: pointer;
     }
-    .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 20px; }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 20px;
+    }
+
     .nav-right a {
-      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; font-weight: 500; transition: opacity 0.2s;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: opacity 0.2s;
     }
+    .nav-right a:hover { opacity: 0.5; }
+
     .icon-btn {
-      background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; position: relative;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      position: relative;
     }
+
     .cart-count {
-      display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px;
-      background: var(--black); color: var(--white); border-radius: 50%; font-size: 9px; font-weight: 700; margin-left: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      background: var(--black);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 9px;
+      font-weight: 700;
+      margin-left: 4px;
     }
-    /* Hero */
+
+    /* ── HERO ── */
     .hero {
-      position: relative; width: 100%; height: calc(100vh - 56px); min-height: 500px; overflow: hidden; background: #ccc;
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 56px);
+      min-height: 500px;
+      overflow: hidden;
+      background: #ccc;
     }
-    .hero-slides { display: flex; width: 100%; height: 100%; transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94); }
-    .hero-slide { min-width: 100%; height: 100%; position: relative; overflow: hidden; }
-    .hero-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+
+    .hero-slides {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .hero-slide {
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
     .hero-overlay {
-      position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 60%);
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 60%);
     }
+
     .hero-content {
-      position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); text-align: center;
-      color: var(--white); width: 100%; padding: 0 24px;
+      position: absolute;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: var(--white);
+      width: 100%;
+      padding: 0 24px;
     }
-    .hero-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 10px; opacity: 0.85; }
-    .hero-title { font-size: clamp(28px,5vw,52px); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px; line-height: 1.1; }
-    .hero-sub { font-size: 13px; letter-spacing: 0.08em; margin-bottom: 28px; opacity: 0.85; }
+
+    .hero-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      opacity: 0.85;
+    }
+
+    .hero-title {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      line-height: 1.1;
+    }
+
+    .hero-sub {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      margin-bottom: 28px;
+      opacity: 0.85;
+    }
+
     .btn-primary {
-      display: inline-block; padding: 13px 36px; background: var(--white); color: var(--black);
-      font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; border: none; cursor: pointer;
+      display: inline-block;
+      padding: 13px 36px;
+      background: var(--white);
+      color: var(--black);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
       transition: background 0.2s, color 0.2s;
     }
     .btn-primary:hover { background: var(--black); color: var(--white); }
+
     .btn-dark {
-      display: inline-block; padding: 13px 36px; background: var(--black); color: var(--white);
-      font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; border: none; cursor: pointer;
-      transition: background 0.2s; width: 100%; text-align: center;
+      display: inline-block;
+      padding: 13px 36px;
+      background: var(--black);
+      color: var(--white);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+      text-align: center;
     }
     .btn-dark:hover { background: #333; }
-    .btn-dark:disabled { background: var(--gray-mid); color: var(--gray-text); cursor: not-allowed; }
-    .hero-dots {
-      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px;
+    .btn-dark:disabled {
+      background: var(--gray-mid);
+      color: var(--gray-text);
+      cursor: not-allowed;
     }
+
+    .hero-dots {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
     .hero-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4); cursor: pointer; transition: background 0.3s;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      cursor: pointer;
+      transition: background 0.3s;
     }
     .hero-dot.active { background: var(--white); }
+
     .hero-arrow {
-      position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: var(--white);
-      width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 18px; transition: background 0.2s; z-index: 2;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: var(--white);
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.2s;
+      z-index: 2;
     }
     .hero-arrow:hover { background: rgba(255,255,255,0.3); }
     .hero-arrow.prev { left: 16px; }
     .hero-arrow.next { right: 16px; }
-    /* Sections */
-    .section-header { text-align: center; padding: 56px 24px 32px; }
-    .section-label { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gray-text); margin-bottom: 10px; }
-    .section-title { font-size: clamp(20px,3vw,28px); font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; }
+
+    /* ── HOMEPAGE PRODUCT SECTION ── */
+    .section-header {
+      text-align: center;
+      padding: 56px 24px 32px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
     .products-section { padding: 0 16px 64px; }
-    /* Product Grid */
+
+    /* ── PRODUCT GRID (shared) ── */
     .product-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 2px;
-      max-width: 1400px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 2px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
+
     .product-card {
-      position: relative; overflow: hidden; cursor: pointer; background: var(--gray-light);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--gray-light);
     }
-    .product-img-wrap { position: relative; aspect-ratio: 3/4; overflow: hidden; }
-    .product-img-primary, .product-img-secondary {
-      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s ease;
+
+    .product-img-wrap {
+      position: relative;
+      aspect-ratio: 3/4;
+      overflow: hidden;
+    }
+
+    .product-img-primary,
+    .product-img-secondary {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.4s ease;
     }
     .product-img-secondary { opacity: 0; }
     .product-card:hover .product-img-secondary { opacity: 1; }
     .product-card:hover .product-img-primary { opacity: 0; }
+
     .product-badge {
-      position: absolute; top: 12px; left: 12px; background: var(--black); color: var(--white);
-      font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; padding: 4px 8px; z-index: 2;
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--black);
+      color: var(--white);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      z-index: 2;
     }
-    .product-info { padding: 14px 12px 18px; background: var(--white); }
-    .product-name { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
+
+    .product-info {
+      padding: 14px 12px 18px;
+      background: var(--white);
+    }
+
+    .product-name {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
     .product-prices { display: flex; align-items: center; gap: 8px; }
+
     .price-sale { font-size: 12px; font-weight: 600; }
-    .price-original { font-size: 11px; color: var(--gray-text); text-decoration: line-through; }
-    /* Collections */
-    .collection-header { padding: 48px 24px 0; max-width: 1400px; margin: 0 auto; }
-    .collection-breadcrumb { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-text); margin-bottom: 16px; }
-    .collection-breadcrumb span { color: var(--black); }
-    .collection-title-row { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 24px; border-bottom: 1px solid var(--gray-mid); }
-    .collection-title { font-size: clamp(18px,3vw,26px); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
-    .collection-count { font-size: 11px; color: var(--gray-text); letter-spacing: 0.08em; }
-    .collection-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1400px; margin: 0 auto; border-bottom: 1px solid var(--gray-mid); margin-bottom: 2px; }
-    .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-    .filter-pill {
-      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; padding: 7px 14px; border: 1px solid var(--gray-mid); background: var(--white); cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    .price-original {
+      font-size: 11px;
+      color: var(--gray-text);
+      text-decoration: line-through;
     }
-    .filter-pill:hover, .filter-pill.active { border-color: var(--black); background: var(--black); color: var(--white); }
-    .sort-wrap { display: flex; align-items: center; gap: 8px; }
-    .sort-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray-text); }
-    .sort-select { font-family: var(--font); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid var(--gray-mid); padding: 7px 10px; background: var(--white); cursor: pointer; outline: none; }
-    .collection-grid-wrap { padding: 0 14px 0; max-width: 1400px; margin: 0 auto; }
-    .collection-product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-    .brand-statement { padding: 56px 24px; max-width: 900px; margin: 0 auto; text-align: center; }
-    .brand-statement p { font-size: clamp(11px,1.5vw,13px); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; line-height: 1.9; }
-    /* Community */
+
+    /* ── COLLECTIONS PAGE ── */
+    .collection-header {
+      padding: 48px 24px 0;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .collection-breadcrumb {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+      margin-bottom: 16px;
+    }
+
+    .collection-breadcrumb span { color: var(--black); }
+
+    .collection-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--gray-mid);
+      margin-bottom: 0;
+    }
+
+    .collection-title {
+      font-size: clamp(18px, 3vw, 26px);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .collection-count {
+      font-size: 11px;
+      color: var(--gray-text);
+      letter-spacing: 0.08em;
+    }
+
+    .collection-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--gray-mid);
+      margin-bottom: 2px;
+    }
+
+    .filter-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .filter-pill {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      border: 1px solid var(--gray-mid);
+      background: var(--white);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .filter-pill:hover, .filter-pill.active {
+      border-color: var(--black);
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sort-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+    }
+
+    .sort-select {
+      font-family: var(--font);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--gray-mid);
+      padding: 7px 10px;
+      background: var(--white);
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* Collection grid – 3 col on desktop */
+    .collection-grid-wrap {
+      padding: 0 14px 0;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .collection-product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    /* Brand statement (from the /hoodies page) */
+    .brand-statement {
+      padding: 56px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .brand-statement p {
+      font-size: clamp(11px, 1.5vw, 13px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.9;
+      color: var(--black);
+    }
+
+    /* ── COMMUNITY SECTION (shared) ── */
     .community-section { padding: 40px 0 64px; }
-    .community-header { text-align: center; margin-bottom: 28px; padding: 0 24px; }
-    .community-label { font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gray-text); margin-bottom: 8px; }
-    .community-handle { font-size: 13px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; }
+
+    .community-header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding: 0 24px;
+    }
+
+    .community-label {
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+      margin-bottom: 8px;
+    }
+
+    .community-handle {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+    }
+
     .community-ticker { overflow: hidden; position: relative; }
-    .community-track { display: flex; gap: 2px; animation: ticker-scroll 28s linear infinite; width: max-content; }
+
+    .community-track {
+      display: flex;
+      gap: 2px;
+      animation: ticker-scroll 28s linear infinite;
+      width: max-content;
+    }
     .community-track:hover { animation-play-state: paused; }
-    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-    .community-img { width: 260px; height: 320px; object-fit: cover; flex-shrink: 0; display: block; }
-    /* Footer */
-    footer { background: var(--white); border-top: 1px solid var(--gray-mid); padding: 48px 24px 32px; }
-    .footer-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 40px; max-width: 1100px; margin: 0 auto 48px; }
-    .footer-col-title { font-size: 10px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 16px; }
-    .footer-col a { display: block; font-size: 12px; color: var(--gray-text); letter-spacing: 0.05em; margin-bottom: 10px; }
+
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .community-img {
+      width: 260px;
+      height: 320px;
+      object-fit: cover;
+      flex-shrink: 0;
+      display: block;
+      transition: opacity 0.3s;
+    }
+    .community-img:hover { opacity: 0.85; }
+
+    /* ── REVIEWS TICKER (PDP) ── */
+    .reviews-ticker {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .reviews-track {
+      display: flex;
+      gap: 2px;
+      animation: ticker-scroll 60s linear infinite;
+      width: max-content;
+    }
+
+    .reviews-track:hover {
+      animation-play-state: paused;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--white);
+      border-top: 1px solid var(--gray-mid);
+      padding: 48px 24px 32px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      max-width: 1100px;
+      margin: 0 auto 48px;
+    }
+
+    .footer-col-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .footer-col a {
+      display: block;
+      font-size: 12px;
+      color: var(--gray-text);
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      transition: color 0.2s;
+    }
     .footer-col a:hover { color: var(--black); }
-    .footer-bottom { border-top: 1px solid var(--gray-mid); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; max-width: 1100px; margin: 0 auto; }
+
+    .footer-bottom {
+      border-top: 1px solid var(--gray-mid);
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
     .footer-logo { font-size: 14px; font-weight: 700; letter-spacing: 0.3em; cursor: pointer; }
     .footer-copy { font-size: 11px; color: var(--gray-text); }
+
     .footer-social { display: flex; gap: 16px; }
-    .footer-social a { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-text); }
+    .footer-social a {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+      transition: color 0.2s;
+    }
     .footer-social a:hover { color: var(--black); }
-    /* Cart Drawer */
+
+    /* ── CART DRAWER ── */
     .cart-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
     }
     .cart-overlay.open { opacity: 1; pointer-events: all; }
+
     .cart-drawer {
-      position: fixed; top: 0; right: 0; width: 380px; max-width: 100vw; height: 100vh; background: var(--white);
-      z-index: 201; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
-      display: flex; flex-direction: column;
+      position: fixed;
+      top: 0; right: 0;
+      width: 380px;
+      max-width: 100vw;
+      height: 100vh;
+      background: var(--white);
+      z-index: 201;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      display: flex;
+      flex-direction: column;
     }
     .cart-drawer.open { transform: translateX(0); }
-    .cart-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--gray-mid); }
-    .cart-header-title { font-size: 12px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
-    .cart-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--black); }
-    .cart-body { flex: 1; overflow-y: auto; padding: 24px; display: flex; align-items: center; justify-content: center; }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--gray-mid);
+    }
+
+    .cart-header-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .cart-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--black);
+    }
+
+    .cart-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .cart-empty { text-align: center; }
-    .cart-empty p { font-size: 12px; letter-spacing: 0.08em; color: var(--gray-text); margin-bottom: 20px; }
+    .cart-empty p {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--gray-text);
+      margin-bottom: 20px;
+    }
+
     .cart-list { width: 100%; display: flex; flex-direction: column; gap: 18px; align-self: flex-start; }
-    .cart-line { display: flex; gap: 14px; align-items: flex-start; }
-    .cart-line img { width: 72px; height: 90px; object-fit: cover; background: var(--gray-light); flex-shrink: 0; }
+    .cart-line {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .cart-line img {
+      width: 72px;
+      height: 90px;
+      object-fit: cover;
+      background: var(--gray-light);
+      flex-shrink: 0;
+    }
     .cart-line-info { flex: 1; }
-    .cart-line-name { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
-    .cart-line-variant { font-size: 10px; color: var(--gray-text); letter-spacing: 0.08em; margin-bottom: 8px; }
-    .cart-line-qty-row { display: flex; align-items: center; justify-content: space-between; }
-    .cart-qty-control { display: flex; align-items: center; border: 1px solid var(--gray-mid); }
-    .cart-qty-control button { width: 24px; height: 24px; background: none; border: none; cursor: pointer; font-size: 13px; }
-    .cart-qty-control span { width: 26px; text-align: center; font-size: 11px; }
+    .cart-line-name {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .cart-line-variant {
+      font-size: 10px;
+      color: var(--gray-text);
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .cart-line-qty-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .cart-qty-control {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--gray-mid);
+    }
+    .cart-qty-control button {
+      width: 24px;
+      height: 24px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .cart-qty-control span {
+      width: 26px;
+      text-align: center;
+      font-size: 11px;
+    }
     .cart-line-price { font-size: 11px; font-weight: 600; }
-    .cart-line-remove { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-text); text-decoration: underline; cursor: pointer; margin-top: 6px; display: inline-block; }
-    .cart-footer { border-top: 1px solid var(--gray-mid); padding: 20px 24px; }
-    .cart-subtotal-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
-    /* PDP */
-    .pdp-breadcrumb { max-width: 1300px; margin: 0 auto; padding: 20px 24px 0; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray-text); }
+    .cart-line-remove {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 6px;
+      display: inline-block;
+    }
+    .cart-footer {
+      border-top: 1px solid var(--gray-mid);
+      padding: 20px 24px;
+    }
+    .cart-subtotal-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* ── PAGE TRANSITION ── */
+    .page-enter {
+      animation: pageIn 0.35s ease forwards;
+    }
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════════════════════════════════
+       PRODUCT DETAIL PAGE (PDP)
+    ══════════════════════════════════ */
+    .pdp-breadcrumb {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 20px 24px 0;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+    }
     .pdp-breadcrumb span { color: var(--black); }
-    .pdp-main { max-width: 1300px; margin: 0 auto; padding: 24px 24px 0; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(280px,460px); gap: 56px; }
+
+    .pdp-main {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 24px 24px 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 460px);
+      gap: 56px;
+    }
+
+    /* Gallery */
     .pdp-gallery { display: flex; gap: 12px; }
-    .pdp-thumbs { display: flex; flex-direction: column; gap: 8px; width: 78px; flex-shrink: 0; max-height: 720px; overflow-y: auto; }
-    .pdp-thumb { aspect-ratio: 3/4; overflow: hidden; cursor: pointer; border: 1px solid transparent; background: var(--gray-light); flex-shrink: 0; }
+
+    .pdp-thumbs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 78px;
+      flex-shrink: 0;
+      max-height: 720px;
+      overflow-y: auto;
+    }
+    .pdp-thumb {
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: var(--gray-light);
+      flex-shrink: 0;
+    }
     .pdp-thumb.active { border-color: var(--black); }
     .pdp-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .pdp-main-image-wrap { flex: 1; position: relative; background: var(--gray-light); overflow: hidden; aspect-ratio: 3/4; }
-    .pdp-main-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .pdp-img-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(255,255,255,0.85); border: none; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+
+    .pdp-main-image-wrap {
+      flex: 1;
+      position: relative;
+      background: var(--gray-light);
+      overflow: hidden;
+      aspect-ratio: 3/4;
+    }
+    .pdp-main-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .pdp-img-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.85);
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .pdp-img-nav.prev { left: 10px; }
     .pdp-img-nav.next { right: 10px; }
-    .pdp-img-counter { position: absolute; bottom: 12px; right: 12px; background: rgba(255,255,255,0.85); font-size: 10px; letter-spacing: 0.08em; padding: 4px 9px; }
+    .pdp-img-counter {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.85);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      padding: 4px 9px;
+    }
+
+    /* Info column */
     .pdp-info { padding-bottom: 48px; }
-    .pdp-title { font-size: clamp(18px,2.4vw,24px); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; line-height: 1.3; }
-    .pdp-rating { font-size: 11px; letter-spacing: 0.06em; color: var(--gray-text); margin-bottom: 16px; }
+
+    .pdp-title {
+      font-size: clamp(18px, 2.4vw, 24px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .pdp-rating {
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--gray-text);
+      margin-bottom: 16px;
+    }
     .pdp-rating .stars { color: var(--black); letter-spacing: 0.05em; margin-right: 6px; }
-    .pdp-price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+
+    .pdp-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
     .pdp-price-sale { font-size: 19px; font-weight: 700; }
-    .pdp-price-original { font-size: 14px; color: var(--gray-text); text-decoration: line-through; }
-    .pdp-tax-note { font-size: 10px; color: var(--gray-text); letter-spacing: 0.05em; margin-bottom: 4px; }
-    .pdp-stock-note { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #c0392b; margin-bottom: 24px; margin-top: 10px; }
-    .pdp-size-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px; }
-    .pdp-size-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-bottom: 24px; }
-    .pdp-size-btn { padding: 11px 0; text-align: center; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; border: 1px solid var(--gray-mid); background: var(--white); cursor: pointer; transition: border-color 0.2s, background 0.2s, color 0.2s; }
+    .pdp-price-original {
+      font-size: 14px;
+      color: var(--gray-text);
+      text-decoration: line-through;
+    }
+    .pdp-tax-note {
+      font-size: 10px;
+      color: var(--gray-text);
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+    .pdp-stock-note {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c0392b;
+      margin-bottom: 24px;
+      margin-top: 10px;
+    }
+
+    .pdp-size-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .pdp-size-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .pdp-size-btn {
+      position: relative;
+      padding: 11px 0;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      border: 1px solid var(--gray-mid);
+      background: var(--white);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
     .pdp-size-btn:hover:not(.sold-out) { border-color: var(--black); }
-    .pdp-size-btn.selected { background: var(--black); color: var(--white); border-color: var(--black); }
-    .pdp-size-btn.sold-out { color: var(--gray-text); cursor: not-allowed; background: repeating-linear-gradient(-45deg,var(--white),var(--white) 4px,var(--gray-mid) 4px,var(--gray-mid) 5px); }
-    .pdp-add-btn { margin-bottom: 28px; padding: 16px 0; font-size: 11px; }
+    .pdp-size-btn.selected {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    .pdp-size-btn.sold-out {
+      color: var(--gray-text);
+      cursor: not-allowed;
+      background: repeating-linear-gradient(
+        -45deg, var(--white), var(--white) 4px, var(--gray-mid) 4px, var(--gray-mid) 5px
+      );
+    }
+
+    .pdp-size-hint {
+      font-size: 10px;
+      color: var(--gray-text);
+      margin-top: -16px;
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    .pdp-add-btn {
+      margin-bottom: 28px;
+      padding: 16px 0;
+      font-size: 11px;
+    }
+
     .pdp-accordion { border-top: 1px solid var(--gray-mid); }
     .pdp-accordion-item { border-bottom: 1px solid var(--gray-mid); }
-    .pdp-accordion-trigger { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 16px 0; background: none; border: none; cursor: pointer; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; text-align: left; }
+    .pdp-accordion-trigger {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: left;
+    }
     .pdp-accordion-trigger .plus { font-size: 15px; font-weight: 400; transition: transform 0.25s; }
     .pdp-accordion-item.open .plus { transform: rotate(45deg); }
-    .pdp-accordion-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .pdp-accordion-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
     .pdp-accordion-item.open .pdp-accordion-panel { max-height: 600px; }
-    .pdp-accordion-content { padding: 0 0 18px; font-size: 11px; line-height: 1.8; letter-spacing: 0.03em; color: #333; }
-    .pdp-lifestyle { width: 100%; max-height: 640px; object-fit: cover; display: block; margin-top: 56px; }
-    .pdp-feature-block { text-align: center; max-width: 760px; margin: 0 auto; padding: 48px 24px 56px; }
-    .pdp-feature-title { font-size: clamp(18px,2.6vw,26px); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
-    .pdp-feature-sub { font-size: 13px; letter-spacing: 0.04em; line-height: 1.7; color: #333; margin-bottom: 22px; }
-    .pdp-feature-list { font-size: 12px; letter-spacing: 0.04em; line-height: 2; color: #333; }
-    .pdp-reviews-header { text-align: center; font-size: 13px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 28px; }
+    .pdp-accordion-content {
+      padding: 0 0 18px;
+      font-size: 11px;
+      line-height: 1.8;
+      letter-spacing: 0.03em;
+      color: #333;
+    }
+    .pdp-accordion-content strong { font-weight: 700; }
+    .pdp-accordion-content p { margin-bottom: 10px; }
+    .pdp-accordion-content a { text-decoration: underline; }
+
+    /* Lifestyle banner */
+    .pdp-lifestyle {
+      width: 100%;
+      max-height: 640px;
+      object-fit: cover;
+      display: block;
+      margin-top: 56px;
+    }
+
+    .pdp-feature-block {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 56px;
+    }
+    .pdp-feature-title {
+      font-size: clamp(18px, 2.6vw, 26px);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .pdp-feature-sub {
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+      color: #333;
+      margin-bottom: 22px;
+    }
+    .pdp-feature-list {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      line-height: 2;
+      color: #333;
+    }
+
+    /* Reviews header */
+    .pdp-reviews-header {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    /* Review card (used inside scroller) */
+    .pdp-review-card {
+      flex: 0 0 240px;
+      background: var(--gray-light);
+    }
+    .pdp-review-card img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      display: block;
+    }
+    .pdp-review-text {
+      padding: 14px 14px 18px;
+      font-size: 11.5px;
+      line-height: 1.6;
+      letter-spacing: 0.02em;
+    }
+    .pdp-review-author {
+      display: block;
+      margin-top: 8px;
+      font-weight: 700;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray-text);
+    }
+
+    /* You may also like */
     .pdp-related-wrap { padding: 56px 16px 0; }
+
+    /* Toast */
     .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: var(--black); color: var(--white); padding: 13px 24px; font-size: 11px;
-      letter-spacing: 0.1em; text-transform: uppercase; z-index: 300; opacity: 0; pointer-events: none;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--black);
+      color: var(--white);
+      padding: 13px 24px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      z-index: 300;
+      opacity: 0;
+      pointer-events: none;
       transition: opacity 0.25s, transform 0.25s;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .collection-product-grid { grid-template-columns: repeat(2,1fr); }
-      .footer-grid { grid-template-columns: repeat(2,1fr); gap: 28px; }
+      .collection-product-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); gap: 28px; }
       .pdp-main { grid-template-columns: 1fr; gap: 28px; }
       .pdp-thumbs { display: none; }
     }
+
     @media (max-width: 600px) {
-      .product-grid { grid-template-columns: repeat(2,1fr); gap: 1px; }
-      .collection-product-grid { grid-template-columns: repeat(2,1fr); }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; }
+      .collection-product-grid { grid-template-columns: repeat(2, 1fr); }
       .community-img { width: 180px; height: 220px; }
       .collection-toolbar { flex-direction: column; align-items: flex-start; gap: 12px; }
       .footer-grid { grid-template-columns: 1fr; }
       .footer-bottom { flex-direction: column; align-items: flex-start; }
-      .pdp-size-grid { grid-template-columns: repeat(5,1fr); }
+      .pdp-size-grid { grid-template-columns: repeat(5, 1fr); }
+      .pdp-main { padding: 16px 16px 0; }
+    }
+
+    @media (max-width: 480px) {
+      .header-inner { padding: 0 16px; }
+      .nav-left a:not(:first-child) { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <div class="header-inner">
-      <nav class="nav-left">
-        <a href="#home" id="navHome">Home</a>
-        <a href="#collections" id="navShop">Shop</a>
-        <button id="navBack" class="back-btn" onclick="history.back()" style="display:none;" title="Back">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M19 12H5M12 19l-7-7 7-7"/>
-          </svg>
-        </button>
-      </nav>
-      <span class="logo" onclick="location.hash='#home'">Your Brand</span>
-      <div class="nav-right">
-        <button class="icon-btn" onclick="toggleCart()" title="Cart">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-          <span class="cart-count" id="cartCount">0</span>
-        </button>
-        <a href="#">Contact</a>
+<!-- ══════════════════════════════════
+     SHARED: Header
+══════════════════════════════════ -->
+
+<header>
+  <div class="header-inner">
+    <nav class="nav-left">
+      <a id="navShop" onclick="navigate('collections')">Shop</a>
+      <button id="navBack" class="icon-btn back-btn" onclick="goBack()" style="display:none;" title="Back">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+      </button>
+    </nav>
+    <span class="logo" onclick="navigate('home')">Your Brand</span>
+    <div class="nav-right">
+      <button class="icon-btn" onclick="toggleCart()" title="Cart">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <button class="icon-btn" title="Search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <!-- Hero Slider (infinite loop with clones) -->
+  <section class="hero">
+    <div class="hero-slides" id="heroSlides">
+      <!-- Clone of last slide (placed first) -->
+      <div class="hero-slide">
+        <img src="https://placehold.co/1600x900/2a2a2a/fff?text=Hero+2" alt="REV Hoodie Lifestyle" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-eyebrow">Crafted for Comfort</p>
+          <h1 class="hero-title">Wear The Silence</h1>
+          <p class="hero-sub">Heavyweight fleece. Minimal mark. Maximum feel.</p>
+          <a class="btn-primary" onclick="navigate('collections')">Explore</a>
+        </div>
+      </div>
+
+      <!-- Real slide 1 -->
+      <div class="hero-slide">
+        <img src="https://placehold.co/1600x900/1a1a1a/fff?text=Hero+1" alt="REV Hoodie" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-eyebrow">New Collection</p>
+          <h1 class="hero-title">The Rev Hoodie</h1>
+          <p class="hero-sub">Quiet aesthetics in its comfiest form.</p>
+          <a class="btn-primary" onclick="navigate('collections')">Shop now</a>
+        </div>
+      </div>
+
+      <!-- Real slide 2 -->
+      <div class="hero-slide">
+        <img src="https://placehold.co/1600x900/2a2a2a/fff?text=Hero+2" alt="REV Hoodie Lifestyle" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-eyebrow">Crafted for Comfort</p>
+          <h1 class="hero-title">Wear The Silence</h1>
+          <p class="hero-sub">Heavyweight fleece. Minimal mark. Maximum feel.</p>
+          <a class="btn-primary" onclick="navigate('collections')">Explore</a>
+        </div>
+      </div>
+
+      <!-- Clone of first slide (placed last) -->
+      <div class="hero-slide">
+        <img src="https://placehold.co/1600x900/1a1a1a/fff?text=Hero+1" alt="REV Hoodie" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-eyebrow">New Collection</p>
+          <h1 class="hero-title">The Rev Hoodie</h1>
+          <p class="hero-sub">Quiet aesthetics in its comfiest form.</p>
+          <a class="btn-primary" onclick="navigate('collections')">Shop now</a>
+        </div>
       </div>
     </div>
-  </header>
 
-  <!-- PAGE: HOME -->
-  <div id="page-home" style="display:block;">
-    <section class="hero">
-      <div class="hero-slides" id="heroSlides">
-        <div class="hero-slide">
-          <img src="https://placehold.co/1600x900/1a1a1a/fff?text=Hero+1" alt="Hero" loading="eager">
-          <div class="hero-overlay"></div>
-          <div class="hero-content">
-            <p class="hero-eyebrow">New Collection</p>
-            <h1 class="hero-title">The Rev Hoodie</h1>
-            <p class="hero-sub">Quiet aesthetics in its comfiest form.</p>
-            <a class="btn-primary" href="#collections">Shop now</a>
+    <button class="hero-arrow prev" onclick="moveSlide(-1)">&#8592;</button>
+    <button class="hero-arrow next" onclick="moveSlide(1)">&#8594;</button>
+
+    <div class="hero-dots" id="heroDots">
+      <div class="hero-dot active" onclick="goSlide(1)"></div>
+      <div class="hero-dot" onclick="goSlide(2)"></div>
+    </div>
+  </section>
+
+  <!-- Home Product Grid -->
+  <section>
+    <div class="section-header">
+      <p class="section-label">Latest Drops</p>
+      <h2 class="section-title">All Hoodies</h2>
+    </div>
+    <div class="products-section">
+      <div class="product-grid" id="homeProductGrid"><div style="text-align:center;padding:60px 0;color:var(--gray-text);">Loading products...</div></div>
+    </div>
+  </section>
+
+  <!-- Community -->
+  <section class="community-section">
+    <div class="community-header">
+      <p class="community-label">Be part of the community</p>
+      <p class="community-handle">@yourbrand</p>
+    </div>
+    <div class="community-ticker">
+      <div class="community-track" id="communityTrackHome"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <p class="footer-col-title">About</p>
+        <a href="#">The Brand</a>
+        <a onclick="navigate('collections')">Shop</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Service &amp; Support</p>
+        <a href="#">Support</a>
+        <a href="#">Retoure</a>
+        <a href="#">Delivery</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Policy</p>
+        <a href="#">Terms &amp; Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Imprint</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-logo" onclick="navigate('home')">Your Brand</span>
+      <span class="footer-copy">© 2026 Your Brand</span>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/reverentyclo/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://open.spotify.com/playlist/06jtuK7WSPf5pvmELzhk0U" target="_blank" rel="noopener">Spotify</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /page-home -->
+
+
+<!-- ══════════════════════════════════
+     PAGE: COLLECTIONS / HOODIES
+══════════════════════════════════ -->
+<div id="page-collections" class="page">
+
+  <!-- Collection Header -->
+  <div class="collection-header">
+    <p class="collection-breadcrumb">
+      <a onclick="navigate('home')">Home</a> / <span>Hoodies</span>
+    </p>
+    <div class="collection-title-row">
+      <h1 class="collection-title">Hoodies</h1>
+      <span class="collection-count" id="collectionCount">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="collection-toolbar">
+    <div class="filter-pills">
+      <button class="filter-pill active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-pill" onclick="setFilter('sale', this)">Sale</button>
+    </div>
+    <div class="sort-wrap">
+      <span class="sort-label">Sort by</span>
+      <select class="sort-select" onchange="sortProducts(this.value)">
+        <option value="featured">Featured</option>
+        <option value="price-asc">Price, low to high</option>
+        <option value="price-desc">Price, high to low</option>
+        <option value="alpha-asc">A–Z</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Collection Grid -->
+  <div class="collection-grid-wrap">
+    <div class="collection-product-grid" id="collectionProductGrid"><div style="text-align:center;padding:60px 0;color:var(--gray-text);grid-column:1/-1;">Loading products...</div></div>
+  </div>
+
+  <!-- Brand Statement -->
+  <div class="brand-statement">
+    <p>Your Brand stands for minimalist, timeless essentials that give comfort, calm and a feeling of confidence. More substance and less stress in everyday life while you write your own story. The perfect fit for everyday. Everywhere.</p>
+  </div>
+
+  <!-- Community -->
+  <section class="community-section">
+    <div class="community-header">
+      <p class="community-label">Be part of the community</p>
+      <p class="community-handle">@yourbrand</p>
+    </div>
+    <div class="community-ticker">
+      <div class="community-track" id="communityTrackCol"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <p class="footer-col-title">About</p>
+        <a href="#">The Brand</a>
+        <a onclick="navigate('collections')">Shop</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Service &amp; Support</p>
+        <a href="#">Support</a>
+        <a href="#">Retoure</a>
+        <a href="#">Delivery</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Policy</p>
+        <a href="#">Terms &amp; Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Imprint</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-logo" onclick="navigate('home')">Your Brand</span>
+      <span class="footer-copy">© 2026 Your Brand</span>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/reverentyclo/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://open.spotify.com/playlist/06jtuK7WSPf5pvmELzhk0U" target="_blank" rel="noopener">Spotify</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /page-collections -->
+
+
+<!-- ══════════════════════════════════
+     PAGE: PRODUCT DETAIL (PDP)
+══════════════════════════════════ -->
+<div id="page-product" class="page">
+
+  <p class="pdp-breadcrumb">
+    <a onclick="navigate('home')">Home</a> / <a onclick="navigate('collections')">Hoodies</a> / <span id="pdpBreadcrumbName">Product</span>
+  </p>
+
+  <div class="pdp-main">
+    <!-- Gallery -->
+    <div class="pdp-gallery">
+      <div class="pdp-thumbs" id="pdpThumbs"></div>
+      <div class="pdp-main-image-wrap">
+        <button class="pdp-img-nav prev" onclick="pdpMoveImage(-1)">&#8592;</button>
+        <img id="pdpMainImage" src="" alt="">
+        <button class="pdp-img-nav next" onclick="pdpMoveImage(1)">&#8594;</button>
+        <span class="pdp-img-counter" id="pdpImgCounter">1 / 8</span>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="pdp-info">
+      <h1 class="pdp-title" id="pdpTitle">REV HOODIE</h1>
+      <p class="pdp-rating"><span class="stars">★★★★★</span>4.8 / 5 Rated</p>
+
+      <div class="pdp-price-row">
+        <span class="pdp-price-sale" id="pdpPriceSale">Rp 599.000</span>
+        <span class="pdp-price-original" id="pdpPriceOriginal">Rp 899.000</span>
+      </div>
+      <p class="pdp-tax-note">Taxes included. Shipping calculated at checkout.</p>
+      <p class="pdp-stock-note" id="pdpStockNote">Low stock</p>
+
+      <p class="pdp-size-label">Size</p>
+      <div class="pdp-size-grid" id="pdpSizeGrid"></div>
+
+      <button class="btn-dark pdp-add-btn" id="pdpAddBtn" onclick="addToCart()">Select a size</button>
+
+      <div class="pdp-accordion">
+        <div class="pdp-accordion-item" id="accDetails">
+          <button class="pdp-accordion-trigger" onclick="toggleAccordion('accDetails')">
+            Detail Produk <span class="plus">+</span>
+          </button>
+          <div class="pdp-accordion-panel">
+            <div class="pdp-accordion-content" id="pdpDetailsContent"></div>
           </div>
         </div>
-        <div class="hero-slide">
-          <img src="https://placehold.co/1600x900/2a2a2a/fff?text=Hero+2" alt="Hero" loading="lazy">
-          <div class="hero-overlay"></div>
-          <div class="hero-content">
-            <p class="hero-eyebrow">Crafted for Comfort</p>
-            <h1 class="hero-title">Wear The Silence</h1>
-            <p class="hero-sub">Heavyweight fleece. Minimal mark. Maximum feel.</p>
-            <a class="btn-primary" href="#collections">Explore</a>
+        <div class="pdp-accordion-item" id="accShipping">
+          <button class="pdp-accordion-trigger" onclick="toggleAccordion('accShipping')">
+            Pengiriman &amp; Pengembalian <span class="plus">+</span>
+          </button>
+          <div class="pdp-accordion-panel">
+            <div class="pdp-accordion-content">
+              <p><strong>Indonesia</strong> — Rp 49.000</p>
+              <p>You will receive your order within 2 to 8 working days after purchase.</p>
+              <p><strong>Returns.</strong> If you're not happy with your order, you have 14 days to return your items for a full refund. We only ask that the items are unused and unaltered, and returned with their tags and original packaging.</p>
+              <p>Return shipping costs are the responsibility of the customer. The refund is usually processed within 7 business days after we receive your package.</p>
+            </div>
           </div>
         </div>
       </div>
-      <button class="hero-arrow prev" onclick="moveSlide(-1)">&#8592;</button>
-      <button class="hero-arrow next" onclick="moveSlide(1)">&#8594;</button>
-      <div class="hero-dots" id="heroDots">
-        <div class="hero-dot active" onclick="goSlide(0)"></div>
-        <div class="hero-dot" onclick="goSlide(1)"></div>
-      </div>
-    </section>
-    <section>
-      <div class="section-header">
-        <p class="section-label">Latest Drops</p>
-        <h2 class="section-title">All Hoodies</h2>
-      </div>
-      <div class="products-section">
-        <div class="product-grid" id="homeProductGrid"></div>
-      </div>
-    </section>
-    <section class="community-section">
-      <div class="community-header">
-        <p class="community-label">Be part of the community</p>
-        <p class="community-handle">@yourbrand</p>
-      </div>
-      <div class="community-ticker">
-        <div class="community-track" id="communityTrackHome"></div>
-      </div>
-    </section>
-    <footer>
-      <div class="footer-grid">
-        <div class="footer-col"><p class="footer-col-title">About</p><a href="#">The Brand</a><a href="#collections">Shop</a></div>
-        <div class="footer-col"><p class="footer-col-title">Service & Support</p><a href="#">Support</a><a href="#">Retoure</a><a href="#">Delivery</a></div>
-        <div class="footer-col"><p class="footer-col-title">Policy</p><a href="#">Terms & Conditions</a><a href="#">Privacy Policy</a><a href="#">Imprint</a></div>
-      </div>
-      <div class="footer-bottom">
-        <span class="footer-logo" onclick="location.hash='#home'">Your Brand</span>
-        <span class="footer-copy">© 2026 Your Brand</span>
-        <div class="footer-social">
-          <a href="#">Instagram</a>
-          <a href="#">Spotify</a>
-        </div>
-      </div>
-    </footer>
-  </div>
-
-  <!-- PAGE: COLLECTIONS -->
-  <div id="page-collections" style="display:none;">
-    <div class="collection-header">
-      <p class="collection-breadcrumb"><a href="#home">Home</a> / <span>Hoodies</span></p>
-      <div class="collection-title-row">
-        <h1 class="collection-title">Hoodies</h1>
-        <span class="collection-count" id="collectionCount">0 products</span>
-      </div>
-    </div>
-    <div class="collection-toolbar">
-      <div class="filter-pills">
-        <button class="filter-pill active" onclick="setFilter('all', this)">All</button>
-        <button class="filter-pill" onclick="setFilter('sale', this)">Sale</button>
-      </div>
-      <div class="sort-wrap">
-        <span class="sort-label">Sort by</span>
-        <select class="sort-select" onchange="sortProducts(this.value)">
-          <option value="featured">Featured</option>
-          <option value="price-asc">Price, low to high</option>
-          <option value="price-desc">Price, high to low</option>
-          <option value="alpha-asc">A–Z</option>
-        </select>
-      </div>
-    </div>
-    <div class="collection-grid-wrap">
-      <div class="collection-product-grid" id="collectionProductGrid"></div>
-    </div>
-    <div class="brand-statement">
-      <p>Your Brand stands for minimalistic, timeless essentials that provide comfort, calm, and confidence.</p>
-    </div>
-    <section class="community-section">
-      <div class="community-header">
-        <p class="community-label">Be part of the community</p>
-        <p class="community-handle">@yourbrand</p>
-      </div>
-      <div class="community-ticker">
-        <div class="community-track" id="communityTrackCol"></div>
-      </div>
-    </section>
-    <footer>
-      <div class="footer-grid">
-        <div class="footer-col"><p class="footer-col-title">About</p><a href="#">The Brand</a><a href="#collections">Shop</a></div>
-        <div class="footer-col"><p class="footer-col-title">Service & Support</p><a href="#">Support</a><a href="#">Retoure</a><a href="#">Delivery</a></div>
-        <div class="footer-col"><p class="footer-col-title">Policy</p><a href="#">Terms & Conditions</a><a href="#">Privacy Policy</a><a href="#">Imprint</a></div>
-      </div>
-      <div class="footer-bottom">
-        <span class="footer-logo" onclick="location.hash='#home'">Your Brand</span>
-        <span class="footer-copy">© 2026 Your Brand</span>
-        <div class="footer-social">
-          <a href="#">Instagram</a>
-          <a href="#">Spotify</a>
-        </div>
-      </div>
-    </footer>
-  </div>
-
-  <!-- PAGE: PRODUCT DETAIL -->
-  <div id="page-product" style="display:none;"></div>
-
-  <!-- CART DRAWER -->
-  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-  <div class="cart-drawer" id="cartDrawer">
-    <div class="cart-header">
-      <span class="cart-header-title">Your Cart</span>
-      <button class="cart-close" onclick="toggleCart()">✕</button>
-    </div>
-    <div class="cart-body" id="cartBody"></div>
-    <div class="cart-footer" id="cartFooter" style="display:none;">
-      <div class="cart-subtotal-row">
-        <span>Subtotal</span>
-        <span id="cartSubtotal">Rp 0</span>
-      </div>
-      <button class="btn-dark" onclick="checkoutViaWA()">CHECK OUT VIA CHAT</button>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- Lifestyle banner -->
+  <img class="pdp-lifestyle" id="pdpLifestyleImg" src="https://placehold.co/1500x640/999/fff?text=Lifestyle" alt="Lifestyle">
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script>
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCW77c9sWDm1dmF8M_7fEs8J7GkylyhnWI",
-      authDomain: "presensi-ecommerce.firebaseapp.com",
-      projectId: "presensi-ecommerce",
-      storageBucket: "presensi-ecommerce.firebasestorage.app",
-      messagingSenderId: "1086583211791",
-      appId: "1:1086583211791:web:0a2e3a24cbc5afef9ae07a"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  <div class="pdp-feature-block">
+    <h2 class="pdp-feature-title">The perfect fit. Always.</h2>
+    <p class="pdp-feature-sub">Our REV-hoodie is designed to stay comfortably, whatever you do everyday. Uni? We got you. Gym and work? Not a problem.</p>
+    <p class="pdp-feature-list">
+      ● Designed to comfortably fit all sizes.<br>
+      ● Skin friendly super soft combed cotton<br>
+      ● With large pocket and Form-fitting cuffs
+    </p>
+  </div>
 
-    /* ---------- GLOBAL STATE ---------- */
-    let products = [];
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    let activeFilter = 'all';
-    let currentSort = 'featured';
-    let pdpProduct = null;
-    let pdpImgIndex = 0;
-    let pdpSelectedSize = null;
-    let currentSlide = 0;
-    const totalSlides = 2;
-    let autoplayTimer;
+  <!-- Reviews (ticker) -->
+  <section class="community-section" style="padding-top:0;">
+    <h3 class="pdp-reviews-header">Loved by everyone, everywhere.</h3>
+    <div class="reviews-ticker">
+      <div class="reviews-track" id="pdpReviewsTrack"></div>
+    </div>
+  </section>
 
-    /* ---------- ROUTING ---------- */
-    function handleRoute() {
-      const hash = location.hash || '#home';
-      document.getElementById('page-home').style.display = hash === '#home' ? 'block' : 'none';
-      document.getElementById('page-collections').style.display = hash === '#collections' ? 'block' : 'none';
-      document.getElementById('page-product').style.display = hash.startsWith('#product/') ? 'block' : 'none';
+  <!-- Community -->
+  <section class="community-section">
+    <div class="community-header">
+      <p class="community-label">Be part of the community</p>
+      <p class="community-handle">@yourbrand</p>
+    </div>
+    <div class="community-ticker">
+      <div class="community-track" id="communityTrackPdp"></div>
+    </div>
+  </section>
 
-      if (hash === '#home') {
-        renderHomeGrid();
-        renderCommunityTicker('communityTrackHome');
-      } else if (hash === '#collections') {
-        applyFilterSort();
-        renderCommunityTicker('communityTrackCol');
-      } else if (hash.startsWith('#product/')) {
-        const slug = hash.split('#product/')[1];
-        showProductPage(slug);
-      }
-    }
+  <!-- You may also like -->
+  <section class="pdp-related-wrap">
+    <div class="section-header" style="padding-top:0;">
+      <p class="section-label">You may also like</p>
+      <h2 class="section-title">More Hoodies</h2>
+    </div>
+    <div class="product-grid" id="pdpRelatedGrid"><div style="text-align:center;padding:30px 0;color:var(--gray-text);grid-column:1/-1;">Loading...</div></div>
+  </section>
 
-    window.addEventListener('hashchange', handleRoute);
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <p class="footer-col-title">About</p>
+        <a href="#">The Brand</a>
+        <a onclick="navigate('collections')">Shop</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Service &amp; Support</p>
+        <a href="#">Support</a>
+        <a href="#">Retoure</a>
+        <a href="#">Delivery</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Policy</p>
+        <a href="#">Terms &amp; Conditions</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Imprint</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-logo" onclick="navigate('home')">Your Brand</span>
+      <span class="footer-copy">© 2026 Your Brand</span>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/reverentyclo/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://open.spotify.com/playlist/06jtuK7WSPf5pvmELzhk0U" target="_blank" rel="noopener">Spotify</a>
+      </div>
+    </div>
+  </footer>
 
-    /* ---------- FIREBASE LISTENER ---------- */
-    db.collection('products').onSnapshot(snap => {
-      products = [];
-      snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
-      handleRoute();
+</div><!-- /page-product -->
+
+
+<!-- ── CART DRAWER ── -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <span class="cart-header-title">Your Cart</span>
+    <button class="cart-close" onclick="toggleCart()">&#10005;</button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-empty">
+      <p>Your cart is empty.</p>
+      <button class="btn-dark" onclick="toggleCart()">Continue Shopping</button>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none;">
+    <div class="cart-subtotal-row">
+      <span>Subtotal</span>
+      <span id="cartSubtotal">Rp 0</span>
+    </div>
+    <button class="btn-dark">CHECK OUT VIA CHAT</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════
+   FIREBASE CONFIG — GANTI DENGAN MILIK ANDA
+════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCzmLBBbpvWakuogg2XrxEg_ojJE0prxZU",
+  authDomain: "project-one-21a3f.firebaseapp.com",
+  projectId: "project-one-21a3f",
+  storageBucket: "project-one-21a3f.firebasestorage.app",
+  messagingSenderId: "163346766100",
+  appId: "1:163346766100:web:7de4e92f57d6c0cd894a01"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+/* ════════════════════════════════
+   TRACK REFERRAL CLICKS
+════════════════════════════════ */
+async function trackReferralClick() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+  if (!refCode) return;
+
+  // Cegah penghitungan ganda dalam sesi yang sama
+  if (sessionStorage.getItem('ref_clicked') === refCode) return;
+  sessionStorage.setItem('ref_clicked', refCode);
+
+  try {
+    // Cari affiliate yang link referralnya mengandung refCode
+    const snapshot = await db.collection('affiliates')
+      .where('referralLink', '>=', `/?ref=${refCode}`)
+      .where('referralLink', '<=', `/?ref=${refCode}\uf8ff`)
+      .get();
+
+    if (snapshot.empty) return;
+
+    const doc = snapshot.docs[0];
+    const currentClicks = doc.data().clicks || 0;
+
+    // Tambah 1 klik
+    await db.collection('affiliates').doc(doc.id).update({
+      clicks: currentClicks + 1
     });
 
-    /* ---------- PRODUCT CARD ---------- */
-    function createProductCard(p) {
-      const div = document.createElement('div');
-      div.className = 'product-card';
-      div.onclick = () => location.hash = '#product/' + p.id;
-      const imgSrc = p.thumbnailBase64 || 'https://placehold.co/533x710/ccc/fff?text=No+Image';
-      div.innerHTML = `
-        <div class="product-img-wrap">
-          <img class="product-img-primary" src="${imgSrc}" alt="${p.name}" loading="lazy">
-          <img class="product-img-secondary" src="${imgSrc}" alt="${p.name}" loading="lazy">
-          ${p.sale ? '<span class="product-badge">Sale</span>' : ''}
+    console.log('Referral click recorded for ref:', refCode);
+  } catch (err) {
+    console.error('Gagal mencatat klik referral:', err);
+  }
+}
+
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+let allProducts = [];
+let currentFilter = 'all';
+let currentSort = 'featured';
+let currentPage = 'home';
+let previousPage = 'home';
+let pdpProduct = null;
+let pdpImgIndex = 0;
+let pdpSelectedSize = null;
+let cart = [];
+let cartOpen = false;
+let toastTimer = null;
+
+/* ── COMMUNITY IMAGES ── */
+const communityImgs = [
+  "https://placehold.co/260x320/444/fff?text=Community+1",
+  "https://placehold.co/260x320/555/fff?text=Community+2",
+  "https://placehold.co/260x320/666/fff?text=Community+3",
+  "https://placehold.co/260x320/777/fff?text=Community+4",
+  "https://placehold.co/260x320/888/fff?text=Community+5",
+  "https://placehold.co/260x320/999/fff?text=Community+6",
+  "https://placehold.co/260x320/aaa/fff?text=Community+7"
+];
+
+/* ── REVIEWS ── */
+const reviews = [
+  { img: "https://placehold.co/240x320/314/fff?text=Review+1", text: "Getting compliments everywhere", author: "David" },
+  { img: "https://placehold.co/240x320/425/fff?text=Review+2", text: "Quality is nice. Next color is already ordered", author: "Jannik S." },
+  { img: "https://placehold.co/240x320/536/fff?text=Review+3", text: "Love it! We need more colors", author: "Lea W." },
+  { img: "https://placehold.co/240x320/647/fff?text=Review+4", text: "Absolutely fav one! Perfect fit, feeling calm and comfy", author: "Olivia V." },
+  { img: "https://placehold.co/240x320/758/fff?text=Review+5", text: "10/10. 2nd time ordering and definitely coming back for more", author: "Bennet W." },
+  { img: "https://placehold.co/240x320/869/fff?text=Review+6", text: "Ended up wearing my Hoodie every day. Great fit and very comfortable.", author: "Alexandra" },
+  { img: "https://placehold.co/240x320/970/fff?text=Review+7", text: "This is definitely not a standard hoodie. Got two pieces and already waiting for the next drop!", author: "Noah V." }
+];
+
+const detailsHTML = `
+  <p><strong>Oversized hoodie, crafted from a heavyweight, premium cotton-polyester blend with an ultra-soft inner side. The double-layered hood and ribbed hem provide a structured fit, while the 3D Your Brand-Logo on the chest completes the minimalistic design.</strong></p>
+  <p>
+    - Oversized fit<br>
+    - Super Soft Fleece inside<br>
+    - Double-layered hood<br>
+    - Ribbed cuffs and hem<br>
+    - Heavyweight 500 GSM<br>
+    - Unisex, fits true to size
+  </p>
+  <p>Composition: 80% Cotton, 20% Polyester blend</p>
+  <p><strong>Wash instructions:</strong> Turn inside out for washing and ironing, wash with similar colours, handwash program cold only, use mild detergent, do not spin at more than 800 revolutions, reshape carefully when wet, dry flat.</p>
+  <p>Do not bleach · Do not put in the dryer · Do not iron hot · 30°C special gentle wash</p>
+`;
+
+/* ════════════════════════════════
+   FIRESTORE — LOAD PRODUCTS
+════════════════════════════════ */
+async function loadProducts() {
+  try {
+    const snapshot = await db.collection('products').get();
+    const products = [];
+    snapshot.forEach(doc => {
+      products.push({ id: doc.id, ...doc.data() });
+    });
+    allProducts = products;
+    return products;
+  } catch (err) {
+    console.error('Error loading products:', err);
+    allProducts = getDefaultProducts();
+    return allProducts;
+  }
+}
+
+function getDefaultProducts() {
+  return [
+    {
+      slug: "rev-hoodie-moca",
+      name: "REV HOODIE MOCA",
+      price: "Rp 599.000",
+      priceNum: 599000,
+      original: "Rp 899.000",
+      sale: true,
+      img: "https://placehold.co/533x710/8B5A2B/fff?text=Moca+Front",
+      img2: "https://placehold.co/533x710/6B4226/fff?text=Moca+Back",
+      gallery: [
+        "https://placehold.co/1200x1600/8B5A2B/fff?text=Moca+1",
+        "https://placehold.co/1200x1600/7A4A2B/fff?text=Moca+2",
+        "https://placehold.co/1200x1600/6A3A1B/fff?text=Moca+3",
+        "https://placehold.co/1200x1600/5A2A0B/fff?text=Moca+4",
+        "https://placehold.co/1200x1600/4A1A00/fff?text=Moca+5",
+        "https://placehold.co/1200x1600/3A0A00/fff?text=Moca+6",
+        "https://placehold.co/1200x1600/2A0000/fff?text=Moca+7",
+        "https://placehold.co/1200x1600/1A0000/fff?text=Moca+8"
+      ],
+      sizes: { XS: false, S: false, M: false, L: false, XL: false }
+    },
+    {
+      slug: "rev-hoodie-chocolate-brown",
+      name: "REV HOODIE CHOC BROWN",
+      price: "Rp 599.000",
+      priceNum: 599000,
+      original: "Rp 899.000",
+      sale: true,
+      img: "https://placehold.co/533x710/5C4033/fff?text=Choc+Front",
+      img2: "https://placehold.co/533x710/3E2723/fff?text=Choc+Back",
+      gallery: [
+        "https://placehold.co/1200x1600/5C4033/fff?text=Choc+1",
+        "https://placehold.co/1200x1600/4E342E/fff?text=Choc+2",
+        "https://placehold.co/1200x1600/3E2723/fff?text=Choc+3"
+      ],
+      sizes: { XS: false, S: true, M: true, L: true, XL: false }
+    },
+    {
+      slug: "rev-hoodie-pineneedle-green",
+      name: "REV HOODIE PINE GREEN",
+      price: "Rp 599.000",
+      priceNum: 599000,
+      original: "Rp 899.000",
+      sale: true,
+      img: "https://placehold.co/533x710/2E4A2E/fff?text=Pine+Front",
+      img2: "https://placehold.co/533x710/1E3A1E/fff?text=Pine+Back",
+      gallery: [
+        "https://placehold.co/1200x1600/2E4A2E/fff?text=Pine+1",
+        "https://placehold.co/1200x1600/1E3A1E/fff?text=Pine+2",
+        "https://placehold.co/1200x1600/0E2A0E/fff?text=Pine+3"
+      ],
+      sizes: { XS: false, S: false, M: true, L: true, XL: true }
+    },
+    {
+      slug: "rev-hoodie-bone",
+      name: "REV HOODIE BONE",
+      price: "Rp 599.000",
+      priceNum: 599000,
+      original: "Rp 899.000",
+      sale: true,
+      img: "https://placehold.co/533x710/D2B48C/fff?text=Bone+Front",
+      img2: "https://placehold.co/533x710/C4A882/fff?text=Bone+Back",
+      gallery: [
+        "https://placehold.co/1200x1600/D2B48C/fff?text=Bone+1",
+        "https://placehold.co/1200x1600/C4A882/fff?text=Bone+2"
+      ],
+      sizes: { XS: false, S: false, M: false, L: false, XL: false }
+    },
+    {
+      slug: "rev-hoodie-gray-flannel",
+      name: "REV HOODIE GRAY FLANNEL",
+      price: "Rp 599.000",
+      priceNum: 599000,
+      original: "Rp 899.000",
+      sale: true,
+      img: "https://placehold.co/533x710/696969/fff?text=Gray+Front",
+      img2: "https://placehold.co/533x710/808080/fff?text=Gray+Back",
+      gallery: [
+        "https://placehold.co/1200x1600/696969/fff?text=Gray+1",
+        "https://placehold.co/1200x1600/808080/fff?text=Gray+2"
+      ],
+      sizes: { XS: false, S: true, M: false, L: true, XL: false }
+    },
+    {
+      slug: "art-design-hoodie-black",
+      name: "ART &amp; DESIGN HOODIE BLACK",
+      price: "Rp 499.000",
+      priceNum: 499000,
+      original: "Rp 899.000",
+      sale: true,
+      img: "https://placehold.co/533x710/222/fff?text=Art+Front",
+      img2: "https://placehold.co/533x710/333/fff?text=Art+Back",
+      gallery: [
+        "https://placehold.co/1200x1600/222/fff?text=Art+1",
+        "https://placehold.co/1200x1600/333/fff?text=Art+2"
+      ],
+      sizes: { XS: false, S: false, M: false, L: false, XL: false }
+    }
+  ];
+}
+
+/* ════════════════════════════════
+   RENDER HELPERS
+════════════════════════════════ */
+function makeCard(p) {
+  const div = document.createElement('div');
+  div.className = 'product-card';
+  div.onclick = () => navigateToProduct(p.slug);
+  div.innerHTML = `
+    <div class="product-img-wrap">
+      <img class="product-img-primary" src="${p.img || p.gallery?.[0] || 'https://placehold.co/533x710/ccc/fff?text=No+Image'}" alt="${p.name}" loading="lazy">
+      <img class="product-img-secondary" src="${p.img2 || p.gallery?.[1] || p.img || 'https://placehold.co/533x710/ccc/fff?text=No+Image'}" alt="${p.name}" loading="lazy">
+      ${p.sale ? '<span class="product-badge">Sale</span>' : ''}
+    </div>
+    <div class="product-info">
+      <p class="product-name">${p.name}</p>
+      <div class="product-prices">
+        <span class="price-sale">${p.price}</span>
+        ${p.original ? `<span class="price-original">${p.original}</span>` : ''}
+      </div>
+    </div>`;
+  return div;
+}
+
+function renderGrid(containerId, list) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  if (!list || list.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--gray-text);grid-column:1/-1;">No products found.</div>';
+    return;
+  }
+  list.forEach(p => el.appendChild(makeCard(p)));
+}
+
+function renderTicker(containerId) {
+  const track = document.getElementById(containerId);
+  if (track.children.length > 0) return;
+  const imgs = [...communityImgs, ...communityImgs];
+  imgs.forEach(src => {
+    const img = document.createElement('img');
+    img.className = 'community-img';
+    img.src = src;
+    img.loading = 'lazy';
+    img.alt = 'Community photo';
+    track.appendChild(img);
+  });
+}
+
+/* ════════════════════════════════
+   NAVIGATION (SPA)
+════════════════════════════════ */
+function navigate(page) {
+  if (currentPage === page) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+
+  document.getElementById('page-' + currentPage).classList.remove('active');
+  const target = document.getElementById('page-' + page);
+  target.classList.add('active', 'page-enter');
+  target.addEventListener('animationend', () => target.classList.remove('page-enter'), { once: true });
+
+  previousPage = currentPage;
+  currentPage = page;
+  window.scrollTo({ top: 0 });
+
+  const shopLink = document.getElementById('navShop');
+  const backBtn = document.getElementById('navBack');
+  if (page === 'collections' || page === 'product') {
+    shopLink.style.display = 'none';
+    backBtn.style.display = 'flex';
+  } else {
+    shopLink.style.display = '';
+    backBtn.style.display = 'none';
+  }
+  shopLink.classList.toggle('active-link', page === 'collections');
+
+  if (page === 'collections') {
+    applyFilterSort();
+  }
+}
+
+function goBack() {
+  if (currentPage === 'collections') {
+    navigate('home');
+  } else {
+    navigate(previousPage);
+  }
+}
+
+/* ════════════════════════════════
+   COLLECTION FILTER & SORT
+════════════════════════════════ */
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilterSort();
+}
+
+function sortProducts(value) {
+  currentSort = value;
+  applyFilterSort();
+}
+
+function applyFilterSort() {
+  let list = currentFilter === 'sale' ? allProducts.filter(p => p.sale) : [...allProducts];
+
+  if (currentSort === 'price-asc') list.sort((a, b) => (a.priceNum || 0) - (b.priceNum || 0));
+  else if (currentSort === 'price-desc') list.sort((a, b) => (b.priceNum || 0) - (a.priceNum || 0));
+  else if (currentSort === 'alpha-asc') list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  renderGrid('collectionProductGrid', list);
+  document.querySelector('.collection-count').textContent = list.length + ' product' + (list.length !== 1 ? 's' : '');
+}
+
+/* ════════════════════════════════
+   HERO SLIDER
+════════════════════════════════ */
+const totalRealSlides = 2;
+let currentSlide = 1;
+let autoplayTimer;
+
+function goSlide(index, instant = false) {
+  const slides = document.getElementById('heroSlides');
+  if (instant) slides.style.transition = 'none';
+  else slides.style.transition = 'transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+  slides.style.transform = `translateX(-${index * 100}%)`;
+  currentSlide = index;
+  const realIndex = (index - 1 + totalRealSlides) % totalRealSlides;
+  document.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === realIndex));
+}
+
+function moveSlide(dir) {
+  clearInterval(autoplayTimer);
+  let next = currentSlide + dir;
+  goSlide(next);
+  if (next === 0) setTimeout(() => goSlide(totalRealSlides, true), 700);
+  else if (next === totalRealSlides + 1) setTimeout(() => goSlide(1, true), 700);
+  autoplayTimer = setInterval(() => moveSlide(1), 5000);
+}
+
+goSlide(1, true);
+autoplayTimer = setInterval(() => moveSlide(1), 5000);
+
+/* ════════════════════════════════
+   PRODUCT DETAIL PAGE
+════════════════════════════════ */
+function navigateToProduct(slug) {
+  const product = allProducts.find(p => p.slug === slug);
+  if (!product) {
+    showToast('Product not found');
+    return;
+  }
+  renderProductPage(product);
+
+  document.getElementById('page-' + currentPage).classList.remove('active');
+  const target = document.getElementById('page-product');
+  target.classList.add('active', 'page-enter');
+  target.addEventListener('animationend', () => target.classList.remove('page-enter'), { once: true });
+
+  previousPage = currentPage;
+  currentPage = 'product';
+  window.scrollTo({ top: 0 });
+
+  document.getElementById('navShop').style.display = 'none';
+  document.getElementById('navBack').style.display = 'flex';
+  document.getElementById('navShop').classList.remove('active-link');
+
+  renderTicker('communityTrackPdp');
+}
+
+function renderProductPage(product) {
+  pdpProduct = product;
+  pdpImgIndex = 0;
+  pdpSelectedSize = null;
+
+  document.getElementById('pdpBreadcrumbName').textContent = product.name.replace(/&amp;/g, '&');
+  document.getElementById('pdpTitle').innerHTML = product.name;
+  document.getElementById('pdpPriceSale').textContent = product.price;
+  document.getElementById('pdpPriceOriginal').textContent = product.original || '';
+  document.getElementById('pdpPriceOriginal').style.display = product.original ? '' : 'none';
+  document.getElementById('pdpDetailsContent').innerHTML = detailsHTML;
+  document.getElementById('pdpLifestyleImg').alt = product.name + ' lifestyle';
+  document.getElementById('pdpLifestyleImg').src = product.img2 || product.gallery?.[0] || 'https://placehold.co/1500x640/999/fff?text=Lifestyle';
+
+  // Stock note
+  const hasStock = Object.values(product.sizes || {}).some(v => v === true);
+  document.getElementById('pdpStockNote').textContent = hasStock ? 'In stock' : 'Low stock';
+  document.getElementById('pdpStockNote').style.color = hasStock ? 'var(--green)' : '#c0392b';
+
+  updatePdpMainImage();
+
+  // Thumbs
+  const thumbsEl = document.getElementById('pdpThumbs');
+  thumbsEl.innerHTML = '';
+  const gallery = product.gallery || [product.img || 'https://placehold.co/1200x1600/ccc/fff?text=No+Image'];
+  gallery.forEach((src, i) => {
+    const div = document.createElement('div');
+    div.className = 'pdp-thumb' + (i === 0 ? ' active' : '');
+    div.innerHTML = `<img src="${src}" alt="${product.name} view ${i+1}" loading="lazy">`;
+    div.onclick = () => { pdpImgIndex = i; updatePdpMainImage(); };
+    thumbsEl.appendChild(div);
+  });
+
+  // Sizes
+  const sizeGrid = document.getElementById('pdpSizeGrid');
+  sizeGrid.innerHTML = '';
+  const sizes = product.sizes || { XS: false, S: false, M: false, L: false, XL: false };
+  Object.entries(sizes).forEach(([size, available]) => {
+    const btn = document.createElement('button');
+    btn.className = 'pdp-size-btn' + (available ? '' : ' sold-out');
+    btn.textContent = size;
+    btn.title = available ? 'In stock' : 'Sold out';
+    btn.onclick = () => { if (available) selectSize(size, btn); };
+    sizeGrid.appendChild(btn);
+  });
+
+  resetAddButton();
+
+  // Reviews ticker
+  const track = document.getElementById('pdpReviewsTrack');
+  track.innerHTML = '';
+  const doubledReviews = [...reviews, ...reviews];
+  doubledReviews.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'pdp-review-card';
+    card.innerHTML = `
+      <img src="${r.img}" alt="Customer photo" loading="lazy">
+      <div class="pdp-review-text">
+        ${r.text}
+        <span class="pdp-review-author">${r.author}</span>
+      </div>`;
+    track.appendChild(card);
+  });
+
+  // Related products
+  const related = allProducts.filter(p => p.slug !== product.slug).slice(0, 4);
+  renderGrid('pdpRelatedGrid', related);
+
+  document.querySelectorAll('.pdp-accordion-item').forEach(item => item.classList.remove('open'));
+}
+
+function updatePdpMainImage() {
+  const product = pdpProduct;
+  const gallery = product.gallery || [product.img || 'https://placehold.co/1200x1600/ccc/fff?text=No+Image'];
+  document.getElementById('pdpMainImage').src = gallery[pdpImgIndex] || gallery[0];
+  document.getElementById('pdpMainImage').alt = product.name;
+  document.getElementById('pdpImgCounter').textContent = (pdpImgIndex + 1) + ' / ' + gallery.length;
+  document.querySelectorAll('.pdp-thumb').forEach((t, i) => t.classList.toggle('active', i === pdpImgIndex));
+}
+
+function pdpMoveImage(dir) {
+  const gallery = pdpProduct.gallery || [pdpProduct.img || 'https://placehold.co/1200x1600/ccc/fff?text=No+Image'];
+  pdpImgIndex = (pdpImgIndex + dir + gallery.length) % gallery.length;
+  updatePdpMainImage();
+}
+
+function selectSize(size, btn) {
+  pdpSelectedSize = size;
+  document.querySelectorAll('.pdp-size-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('pdpAddBtn').textContent = 'Add to cart';
+  document.getElementById('pdpAddBtn').disabled = false;
+}
+
+function resetAddButton() {
+  document.getElementById('pdpAddBtn').textContent = 'Select a size';
+  document.getElementById('pdpAddBtn').disabled = true;
+}
+
+function toggleAccordion(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ════════════════════════════════
+   CART (localStorage)
+════════════════════════════════ */
+function loadCart() {
+  try {
+    const data = localStorage.getItem('shop_cart');
+    if (data) cart = JSON.parse(data);
+  } catch (e) { cart = []; }
+  renderCart();
+}
+
+function saveCart() {
+  localStorage.setItem('shop_cart', JSON.stringify(cart));
+}
+
+function toggleCart() {
+  cartOpen = !cartOpen;
+  document.getElementById('cartOverlay').classList.toggle('open', cartOpen);
+  document.getElementById('cartDrawer').classList.toggle('open', cartOpen);
+  document.body.style.overflow = cartOpen ? 'hidden' : '';
+}
+
+function addToCart() {
+  if (!pdpSelectedSize || !pdpProduct) {
+    showToast('Please select a size first');
+    return;
+  }
+  const existing = cart.find(c => c.slug === pdpProduct.slug && c.size === pdpSelectedSize);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({
+      slug: pdpProduct.slug,
+      name: pdpProduct.name,
+      size: pdpSelectedSize,
+      price: pdpProduct.price,
+      priceNum: pdpProduct.priceNum || 0,
+      img: pdpProduct.gallery?.[0] || pdpProduct.img || 'https://placehold.co/72x90/ccc/fff?text=No+Image',
+      qty: 1
+    });
+  }
+  saveCart();
+  renderCart();
+  showToast('Added to cart');
+  toggleCart();
+}
+
+function changeQty(index, delta) {
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) cart.splice(index, 1);
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  saveCart();
+  renderCart();
+}
+
+function renderCart() {
+  const totalQty = cart.reduce((sum, c) => sum + c.qty, 0);
+  document.getElementById('cartCount').textContent = totalQty;
+
+  const body = document.getElementById('cartBody');
+  const footer = document.getElementById('cartFooter');
+
+  if (cart.length === 0) {
+    body.innerHTML = `
+      <div class="cart-empty">
+        <p>Your cart is empty.</p>
+        <button class="btn-dark" onclick="toggleCart()">Continue Shopping</button>
+      </div>`;
+    body.style.justifyContent = 'center';
+    footer.style.display = 'none';
+    return;
+  }
+
+  body.style.justifyContent = 'flex-start';
+  const list = document.createElement('div');
+  list.className = 'cart-list';
+  cart.forEach((c, i) => {
+    const line = document.createElement('div');
+    line.className = 'cart-line';
+    line.innerHTML = `
+      <img src="${c.img}" alt="${c.name}">
+      <div class="cart-line-info">
+        <p class="cart-line-name">${c.name}</p>
+        <p class="cart-line-variant">Size: ${c.size}</p>
+        <div class="cart-line-qty-row">
+          <div class="cart-qty-control">
+            <button onclick="changeQty(${i},-1)">&minus;</button>
+            <span>${c.qty}</span>
+            <button onclick="changeQty(${i},1)">+</button>
+          </div>
+          <span class="cart-line-price">Rp ${(c.priceNum * c.qty).toLocaleString('id-ID')}</span>
         </div>
-        <div class="product-info">
-          <p class="product-name">${p.name}</p>
-          <div class="product-prices">
-            <span class="price-sale">Rp ${p.price?.toLocaleString('id-ID')}</span>
-            ${p.originalPrice ? `<span class="price-original">Rp ${p.originalPrice.toLocaleString('id-ID')}</span>` : ''}
-          </div>
-        </div>`;
-      return div;
-    }
+        <span class="cart-line-remove" onclick="removeFromCart(${i})">Remove</span>
+      </div>`;
+    list.appendChild(line);
+  });
+  body.innerHTML = '';
+  body.appendChild(list);
 
-    function renderGrid(containerId, list) {
-      const el = document.getElementById(containerId);
-      el.innerHTML = '';
-      list.forEach(p => el.appendChild(createProductCard(p)));
-    }
+  const subtotal = cart.reduce((sum, c) => sum + c.priceNum * c.qty, 0);
+  document.getElementById('cartSubtotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+  footer.style.display = 'block';
+}
 
-    function renderHomeGrid() {
-      if (products.length > 0) renderGrid('homeProductGrid', products);
-    }
+/* ════════════════════════════════
+   TOAST
+════════════════════════════════ */
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
 
-    /* ---------- COLLECTIONS ---------- */
-    function setFilter(filter, btn) {
-      activeFilter = filter;
-      document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      applyFilterSort();
-    }
+/* ════════════════════════════════
+   INIT
+════════════════════════════════ */
+async function init() {
+  // Catat klik referral jika ada parameter ?ref=
+  await trackReferralClick();
 
-    function sortProducts(value) {
-      currentSort = value;
-      applyFilterSort();
-    }
+  await loadProducts();
+  renderGrid('homeProductGrid', allProducts);
+  renderTicker('communityTrackHome');
+  renderTicker('communityTrackCol');
+  applyFilterSort();
+  loadCart();
+}
 
-    function applyFilterSort() {
-      let list = activeFilter === 'sale' ? products.filter(p => p.sale) : [...products];
-      if (currentSort === 'price-asc') list.sort((a, b) => a.price - b.price);
-      else if (currentSort === 'price-desc') list.sort((a, b) => b.price - a.price);
-      else if (currentSort === 'alpha-asc') list.sort((a, b) => a.name.localeCompare(b.name));
-      renderGrid('collectionProductGrid', list);
-      document.getElementById('collectionCount').textContent = list.length + ' product' + (list.length !== 1 ? 's' : '');
-    }
+document.addEventListener('DOMContentLoaded', init);
+</script>
 
-    /* ---------- PDP ---------- */
-    function showProductPage(slug) {
-      pdpProduct = products.find(p => p.id === slug) || null;
-      if (!pdpProduct) {
-        document.getElementById('page-product').innerHTML = '<p style="text-align:center;padding:40px;">Produk tidak ditemukan.</p>';
-        return;
-      }
-      pdpImgIndex = 0;
-      pdpSelectedSize = null;
-      const container = document.getElementById('page-product');
-      const mainImg = pdpProduct.thumbnailBase64 || 'https://placehold.co/800x1067/ccc/fff?text=No+Image';
-      const sizesHTML = ['XS','S','M','L','XL'].map(size => {
-        const available = pdpProduct.sizes?.[size] || false;
-        return `<button class="pdp-size-btn${available ? '' : ' sold-out'}" onclick="${available ? `selectSize('${size}')` : ''}" ${!available ? 'disabled' : ''}>${size}</button>`;
-      }).join('');
-      container.innerHTML = `
-        <p class="pdp-breadcrumb"><a href="#home">Home</a> / <a href="#collections">Hoodies</a> / <span>${pdpProduct.name}</span></p>
-        <div class="pdp-main">
-          <div class="pdp-gallery">
-            <div class="pdp-thumbs">
-              <div class="pdp-thumb active" onclick="pdpGoToImage(0)"><img src="${mainImg}" alt=""></div>
-            </div>
-            <div class="pdp-main-image-wrap">
-              <img id="pdpMainImage" src="${mainImg}" alt="${pdpProduct.name}">
-              <span class="pdp-img-counter">1 / 1</span>
-            </div>
-          </div>
-          <div class="pdp-info">
-            <h1 class="pdp-title">${pdpProduct.name}</h1>
-            <p class="pdp-rating"><span class="stars">★★★★★</span>4.8 / 5 Rated</p>
-            <div class="pdp-price-row">
-              <span class="pdp-price-sale">Rp ${pdpProduct.price?.toLocaleString('id-ID')}</span>
-              ${pdpProduct.originalPrice ? `<span class="pdp-price-original">Rp ${pdpProduct.originalPrice.toLocaleString('id-ID')}</span>` : ''}
-            </div>
-            <p class="pdp-tax-note">Taxes included. Shipping calculated at checkout.</p>
-            <p class="pdp-stock-note">Low stock</p>
-            <p class="pdp-size-label">Size</p>
-            <div class="pdp-size-grid">${sizesHTML}</div>
-            <button class="btn-dark pdp-add-btn" id="pdpAddBtn" disabled>Select a size</button>
-            <div class="pdp-accordion">
-              <div class="pdp-accordion-item" id="accDetails">
-                <button class="pdp-accordion-trigger" onclick="toggleAccordion('accDetails')">Detail Produk <span class="plus">+</span></button>
-                <div class="pdp-accordion-panel"><div class="pdp-accordion-content">${pdpProduct.description || 'No description.'}</div></div>
-              </div>
-              <div class="pdp-accordion-item" id="accShipping">
-                <button class="pdp-accordion-trigger" onclick="toggleAccordion('accShipping')">Pengiriman & Pengembalian <span class="plus">+</span></button>
-                <div class="pdp-accordion-panel"><div class="pdp-accordion-content"><p><strong>Indonesia</strong> — Rp 49.000</p></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <img class="pdp-lifestyle" src="${mainImg}" alt="${pdpProduct.name} lifestyle">
-        <section class="community-section">
-          <div class="community-header"><p class="community-label">Be part of the community</p><p class="community-handle">@yourbrand</p></div>
-          <div class="community-ticker"><div class="community-track" id="communityTrackPdp"></div></div>
-        </section>
-        <section class="pdp-related-wrap">
-          <div class="section-header"><p class="section-label">You may also like</p><h2 class="section-title">More Hoodies</h2></div>
-          <div class="product-grid" id="pdpRelatedGrid"></div>
-        </section>
-      `;
-      // Related products
-      const related = products.filter(p => p.id !== slug);
-      if (related.length > 0) renderGrid('pdpRelatedGrid', related);
-      renderCommunityTicker('communityTrackPdp');
-    }
-
-    window.selectSize = function(size) {
-      pdpSelectedSize = size;
-      document.querySelectorAll('.pdp-size-btn').forEach(b => b.classList.remove('selected'));
-      const btn = document.querySelector(`.pdp-size-btn:not(.sold-out)`);
-      if (btn) btn.classList.add('selected');
-      const addBtn = document.getElementById('pdpAddBtn');
-      addBtn.textContent = 'Add to cart';
-      addBtn.disabled = false;
-      addBtn.onclick = () => { addToCart(pdpProduct, size); toggleCart(); };
-    };
-
-    window.pdpGoToImage = function(index) {
-      pdpImgIndex = index;
-      updatePDPImage();
-    };
-
-    function updatePDPImage() {
-      const img = document.getElementById('pdpMainImage');
-      if (img) img.src = pdpProduct.thumbnailBase64;
-      document.getElementById('pdpImgCounter').textContent = '1 / 1';
-    }
-
-    window.toggleAccordion = function(id) {
-      document.getElementById(id).classList.toggle('open');
-    };
-
-    /* ---------- CART ---------- */
-    function saveCart() {
-      localStorage.setItem('cart', JSON.stringify(cart));
-      updateCartUI();
-    }
-
-    function updateCartUI() {
-      document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.qty, 0);
-      renderCartContent();
-    }
-
-    function addToCart(product, size) {
-      const existing = cart.find(i => i.id === product.id && i.size === size);
-      if (existing) existing.qty += 1;
-      else cart.push({
-        id: product.id,
-        name: product.name,
-        size: size,
-        price: product.price,
-        img: product.thumbnailBase64 || '',
-        qty: 1
-      });
-      saveCart();
-      showToast('Added to cart');
-    }
-
-    function renderCartContent() {
-      const body = document.getElementById('cartBody');
-      const footer = document.getElementById('cartFooter');
-      if (cart.length === 0) {
-        body.innerHTML = '<div class="cart-empty"><p>Your cart is empty.</p><button class="btn-dark" onclick="toggleCart()">Continue Shopping</button></div>';
-        body.style.justifyContent = 'center';
-        footer.style.display = 'none';
-        return;
-      }
-      body.style.justifyContent = 'flex-start';
-      let html = '<div class="cart-list">';
-      cart.forEach((item, i) => {
-        html += `
-          <div class="cart-line">
-            <img src="${item.img || 'https://placehold.co/72x90'}" alt="${item.name}">
-            <div class="cart-line-info">
-              <p class="cart-line-name">${item.name}</p>
-              <p class="cart-line-variant">Size: ${item.size}</p>
-              <div class="cart-line-qty-row">
-                <div class="cart-qty-control">
-                  <button onclick="changeQty(${i},-1)">−</button>
-                  <span>${item.qty}</span>
-                  <button onclick="changeQty(${i},1)">+</button>
-                </div>
-                <span class="cart-line-price">Rp ${(item.price * item.qty).toLocaleString('id-ID')}</span>
-              </div>
-              <span class="cart-line-remove" onclick="removeFromCart(${i})">Remove</span>
-            </div>
-          </div>`;
-      });
-      html += '</div>';
-      body.innerHTML = html;
-      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      document.getElementById('cartSubtotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
-      footer.style.display = 'block';
-    }
-
-    window.changeQty = function(index, delta) {
-      cart[index].qty += delta;
-      if (cart[index].qty <= 0) cart.splice(index, 1);
-      saveCart();
-    };
-
-    window.removeFromCart = function(index) {
-      cart.splice(index, 1);
-      saveCart();
-    };
-
-    window.toggleCart = function() {
-      const overlay = document.getElementById('cartOverlay');
-      const drawer = document.getElementById('cartDrawer');
-      const open = drawer.classList.contains('open');
-      if (open) {
-        overlay.classList.remove('open');
-        drawer.classList.remove('open');
-        document.body.style.overflow = '';
-      } else {
-        overlay.classList.add('open');
-        drawer.classList.add('open');
-        document.body.style.overflow = 'hidden';
-      }
-    };
-
-    function checkoutViaWA() {
-      if (cart.length === 0) return;
-      let msg = 'Halo, saya mau pesan:%0A';
-      cart.forEach(item => {
-        msg += `- ${item.name} (Size: ${item.size}) x${item.qty} — Rp ${(item.price * item.qty).toLocaleString('id-ID')}%0A`;
-      });
-      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-      msg += `%0ATotal: Rp ${subtotal.toLocaleString('id-ID')}`;
-      window.open('https://wa.me/628123456789?text=' + msg, '_blank');
-    }
-
-    /* ---------- HERO SLIDER ---------- */
-    function goSlide(index) {
-      document.getElementById('heroSlides').style.transform = `translateX(-${index * 100}%)`;
-      currentSlide = index;
-      document.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === index));
-    }
-
-    window.moveSlide = function(dir) {
-      clearInterval(autoplayTimer);
-      let next = currentSlide + dir;
-      if (next < 0) next = totalSlides - 1;
-      if (next >= totalSlides) next = 0;
-      goSlide(next);
-      autoplayTimer = setInterval(() => moveSlide(1), 5000);
-    };
-
-    autoplayTimer = setInterval(() => moveSlide(1), 5000);
-
-    /* ---------- COMMUNITY TICKER ---------- */
-    const communityImgs = [
-      "https://placehold.co/260x320/444/fff?text=1",
-      "https://placehold.co/260x320/555/fff?text=2",
-      "https://placehold.co/260x320/666/fff?text=3",
-      "https://placehold.co/260x320/777/fff?text=4",
-      "https://placehold.co/260x320/888/fff?text=5"
-    ];
-
-    function renderCommunityTicker(containerId) {
-      const track = document.getElementById(containerId);
-      track.innerHTML = '';
-      [...communityImgs, ...communityImgs].forEach(src => {
-        const img = document.createElement('img');
-        img.className = 'community-img';
-        img.src = src;
-        img.alt = 'Community';
-        img.loading = 'lazy';
-        track.appendChild(img);
-      });
-    }
-
-    /* ---------- TOAST ---------- */
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
-    }
-
-    /* ---------- INIT ---------- */
-    updateCartUI();
-    handleRoute();
-  </script>
 </body>
 </html>
